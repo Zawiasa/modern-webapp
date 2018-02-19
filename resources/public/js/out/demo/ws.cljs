@@ -9,13 +9,13 @@
 
 (let [{:keys [chsk ch-recv send-fn state]}
       (sente/make-channel-socket! "/chsk" ; Note the same path as before
-       {:type :auto ; e/o #{:auto :ajax :ws}
-       })]
+       {:type :auto})] ; e/o #{:auto :ajax :ws}
+
   (def chsk       chsk)
   (def ch-chsk    ch-recv) ; ChannelSocket's receive channel
   (def chsk-send! send-fn) ; ChannelSocket's send API fn
-  (def chsk-state state)   ; Watchable, read-only atom
-  )
+  (def chsk-state state))   ; Watchable, read-only atom
+
 
 (defmulti event-msg-handler :id)
 
@@ -25,19 +25,19 @@
 
 (defmethod event-msg-handler :chsk/state
   [{:as ev-msg :keys [?data]}]
-  (debugf "%s" ?data)  
-  (re-frame/dispatch [:ws/connected (:open? ?data)] ))
+  (debugf "%s" ?data)
+  (re-frame/dispatch [:ws/connected (:open? ?data)]))
 
 
 (defmethod event-msg-handler :chsk/handshake
-  [{:as ev-msg :keys [?data]}]
+  [{:as ev-msg :keys [?data]}])
   ; ???
-  )
+
 
 
 (defmethod event-msg-handler :chsk/recv
   [{:as ev-msg :keys [?data]}]
-    (re-frame/dispatch ?data))
+  (re-frame/dispatch ?data))
 
 
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
@@ -49,4 +49,3 @@
 (defn start-router! []
   (stop-router!)
   (reset! router (sente/start-chsk-router! ch-chsk event-msg-handler*)))
-

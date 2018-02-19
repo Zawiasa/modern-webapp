@@ -18,11 +18,14 @@
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport"
              :content "width=device-width, initial-scale=1"}]
-     (include-css (if (env :dev) "css/site.css" "css/site.min.css"))]
-    [:body
+     (include-css (if (env :dev) "css/site.css" "css/site.min.css"))
+     (include-css "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/css/uikit.min.css")]
+    [:body.full-page
      [:div#app
       [:h3 "Loading..."]]]
-     (include-js "js/app.js")]))
+    (include-js "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/js/uikit.min.js")
+    (include-js "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/js/uikit-icons.min.js")
+    (include-js "js/app.js")]))
 
 
 (defroutes routes
@@ -35,9 +38,8 @@
 
 (def app
   (let [handler (wrap-defaults #'routes site-defaults)]
-    (if (env :dev) 
-      (-> handler 
-          wrap-exceptions 
-          wrap-reload) 
+    (if (env :dev)
+      (-> handler
+          wrap-exceptions
+          wrap-reload)
       handler)))
-

@@ -2,8 +2,8 @@
   (:require [re-frame.core :as re-frame]
             [differ.core :as differ]
             [taoensso.encore :as encore :refer (debugf)]
-            [demo.ws :as ws]
-            ))
+            [demo.ws :as ws]))
+
 
 
 (re-frame/register-handler
