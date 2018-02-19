@@ -1,96 +1,91 @@
-(defproject webtemp "0.0.1-SNAPSHOT"
-  :description "FIXME"
-  :dependencies [[org.clojure/clojure "1.9.0"]
-                 [org.clojure/tools.logging "0.4.0"]
-                 [cheshire "5.8.0"]
-                 [circleci/clj-yaml "0.5.5"]
-                 [compojure "1.6.0"]
-                 [environ "1.1.0"]
-                 [mount "0.1.11"]
-                 [hiccup "1.0.5"]
-                 [com.taoensso/sente "1.11.0"]
-                 [ring/ring-defaults "0.3.1"]
-                 [ring/ring-jetty-adapter "1.6.2"]
-                 [duratom "0.3.7"]
-
-                 [spootnik/unilog "0.7.22"]
-                 ;;client-side
-                 [re-frame "0.9.4"]
-                 [lein-figwheel "0.5.14"]
-                 [reagent "0.7.0"]
-                 [secretary "1.2.3"]
-                 [jayq "2.5.4"]
-                 [com.google.guava/guava "19.0"]
-                 [org.clojure/core.async    "0.4.474"]
-                 [org.clojure/clojurescript "1.9.229"]
-                 [venantius/accountant "0.1.7"
-                  :exclusions [org.clojure/tools.reader]]]
-  :ring {:handler webtemp.handlers/app}
+(defproject demo "0.1.0-SNAPSHOT"
+  :description "FIXME: write description"
+  :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :uberjar-name "webtemp.jar"
-  :main webtemp.core
-  :source-paths ["src"]
-  :resource-paths ["resources" "target/cljsbuild"]
 
-  :plugins [[lein-environ "1.0.2"]
-            [lein-cljsbuild "1.1.1"]
-            [lein-asset-minifier "0.2.7"
-             :exclusions [org.clojure/clojure]]]
-  :clean-targets ^{:protect false}
-  [:target-path
-   [:cljsbuild :builds :app :compiler :output-dir]
-   [:cljsbuild :builds :app :compiler :output-to]]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [differ "0.2.1"]
+                 [http-kit "2.1.19"]
+                 [reagent "0.5.1"]
+                 [reagent-forms "0.5.11"]
+                 [reagent-utils "0.1.5"]
+                 [re-frame "0.4.1"]
+                 [ring "1.4.0"]
+                 [ring/ring-defaults "0.1.5"]
+                 [prone "0.8.2"]
+                 [compojure "1.4.0"]
+                 [hiccup "1.0.5"]
+                 [environ "1.0.1"]
+                 [org.clojure/clojurescript "1.7.122" :scope "provided"]
+                 [secretary "1.2.3"]
+                 [com.taoensso/sente  "1.7.0-beta2"]]
 
-  :cljsbuild
-  {:builds {:app
-              {:source-paths ["src/webtemp-client"]
-               :compiler
-               {:main "webtemp-client.dev"
-                :asset-path "/js/out"
-                :output-to "resources/public/js/app.1.20.js"
-                :output-dir "target/cljsbuild/public/js/out"
-                :source-map true
-                :optimizations :none
-                :pretty-print  true}}
-            :min
-            {
-              :source-paths ["src/webtemp-client"]
-              :compiler
-               {
-                :output-to "resources/public/js/app.1.20.js"
-                :output-dir "target/uberjar"
-                :optimizations :simple
-                :externs ["externs/jquery.js"]
+  :plugins [[lein-environ "1.0.1"]
+            [lein-asset-minifier "0.2.2"]]
 
-                :pretty-print  false}}}}
+  :ring {:handler demo.handler/app
+         :uberwar-name "demo.war"}
 
+  :min-lein-version "2.5.0"
 
-  :figwheel
-  {:http-server-root "public"
-   :server-port 3449
-   :nrepl-port 7002
-   :nrepl-middleware ["cemerick.piggieback/wrap-cljs-repl"]
+  :uberjar-name "demo.jar"
 
-   :css-dirs ["resources/public/css"]
-   :ring-handler webtemp.handlers/app}
+  :main demo.server
 
-  :profiles {:dev {:repl-options {:init-ns user
-                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+  :clean-targets ^{:protect false} [:target-path
+                                    [:cljsbuild :builds :app :compiler :output-dir]
+                                    [:cljsbuild :builds :app :compiler :output-to]]
+
+  :source-paths ["src/clj" "src/cljc"]
+
+  :minify-assets
+  {:assets
+    {"resources/public/css/site.min.css" "resources/public/css/site.css"}}
+
+  :cljsbuild {:builds {:app {:source-paths ["src/cljs" "src/cljc"]
+                             :compiler {:output-to     "resources/public/js/app.js"
+                                        :output-dir    "resources/public/js/out"
+                                        :asset-path   "js/out"
+                                        :optimizations :none
+                                        :pretty-print  true}}}}
+
+  :profiles {:dev {:repl-options {:init-ns demo.repl}
+
                    :dependencies [[ring/ring-mock "0.3.0"]
-                                  [ring/ring-devel "1.5.0"]
-                                  [prone "1.1.4"]
-                                  [figwheel-sidecar "0.5.8"]
-                                  [org.clojure/tools.nrepl "0.2.12"]
-                                  [com.cemerick/piggieback "0.2.2-SNAPSHOT"]
-                                  [pjstadig/humane-test-output "0.8.1"]]
+                                  [ring/ring-devel "1.4.0"]
+                                  [lein-figwheel "0.4.0"]
+                                  [org.clojure/tools.nrepl "0.2.11"]
+                                  [pjstadig/humane-test-output "0.7.0"]]
 
-                   :plugins [[lein-figwheel "0.5.8"]
-                             [lein-ring "0.12.2"]
-                             [lein-environ "1.1.0"]
-                             [lein-cljsbuild "1.1.1"]]
-                   :env {:config-path "dev/resources/config.yml" :dev true}
+                   :source-paths ["env/dev/clj"]
+                   :plugins [[lein-figwheel "0.4.0"]
+                             [lein-cljsbuild "1.0.6"]]
+
                    :injections [(require 'pjstadig.humane-test-output)
                                 (pjstadig.humane-test-output/activate!)]
 
-                   :source-paths ["dev/src" "test/webtemp"]}})
+                   :figwheel {:http-server-root "public"
+                              :server-port 3449
+                              :nrepl-port 7002
+                              :css-dirs ["resources/public/css"]
+                              :ring-handler demo.handler/app}
+
+                   :env {:dev true}
+
+                   :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"]
+                                              :compiler {:main "demo.dev"
+                                                         :source-map true}}
+}
+}}
+
+             :uberjar {:hooks [leiningen.cljsbuild minify-assets.plugin/hooks]
+                       :env {:production true}
+                       :aot :all
+                       :omit-source true
+                       :cljsbuild {:jar true
+                                   :builds {:app
+                                             {:source-paths ["env/prod/cljs"]
+                                              :compiler
+                                              {:optimizations :advanced
+                                               :pretty-print false}}}}}})
