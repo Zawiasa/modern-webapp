@@ -2,9 +2,17 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [duratom.core :refer [duratom]]
+            [ring.middleware.transit :refer [wrap-transit]]
             [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.transit :refer [wrap-transit]]
+            [ring-transit-middleware "0.1.3"]
+            [ring.middleware.multipart-params :refer [wrap-multipart-params]]
+            [ring.middleware.reload :refer [wrap-reload]]
+            [ring.middleware.session :refer [wrap-session]]
+            [ring.middleware.params :refer [wrap-params]]
             [hiccup.page :refer [include-js include-css html5]]
             [hiccup.element :refer [javascript-tag]]
+            [ring.middleware.gzip :refer [wrap-gzip]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
 
 (def posts
@@ -42,7 +50,15 @@
 
 (def app
   (-> app-routes
+      (wrap-defaults
+          (assoc (assoc-in site-defaults [:security :anti-forgery] false) :proxy true))
       (wrap-reload)
+      (wrap-transit)
+      (wrap-params)
+      (wrap-multipart-params)
+
+      (wrap-session)
+      (wrap-gzip)
       (wrap-defaults site-defaults)))
 
 (defn get-handler
