@@ -1,5 +1,6 @@
 (ns demo.ws
   (:require [differ.core :as differ]
+            [demo.db :as db]
             [taoensso.sente :as sente]
             [org.httpkit.server :as http-kit]
             [taoensso.sente.server-adapters.http-kit :refer (get-sch-adapter)]
@@ -24,10 +25,8 @@
     (chsk-send! uid data)))
 
 
-(defonce shared-db (atom {:count 0}))
-
 ; Watch for changes to the shared DB and broadcast a diff to them.
-(add-watch shared-db :watch
+(add-watch db/shared :watch
   (fn [k reference old-state new-state]
     (broadcast [:state/diff (differ/diff old-state new-state)])))
 
@@ -45,12 +44,12 @@
 
 
 (defmethod event-msg-handler :state/sync [ev-msg]
-  (broadcast [:state/sync @shared-db]))
+  (broadcast [:state/sync @db/shared]))
 
 (defmethod event-msg-handler :counter/incr
   ; Increment the counter locally. The watcher will push the state to clients.
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (reset! shared-db (update-in @shared-db [:count] + (:delta ?data))))
+  (reset! db/shared (update-in @db/shared [:count] + (:delta ?data))))
 
 
 (defonce router (atom nil))

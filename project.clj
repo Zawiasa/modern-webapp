@@ -19,7 +19,13 @@
                  [environ "1.1.0"]
                  [org.clojure/clojurescript "1.9.946"]
                  [secretary "1.2.3"]
-                 [com.taoensso/sente "1.12.0"]]
+                 [com.taoensso/sente "1.12.0"]
+
+                 [org.clojure/java.jdbc "0.7.3"]
+                 [mpg "1.3.0"]
+                 [hikari-cp "1.8.1"]
+                 [metosin/spec-tools "0.6.1"]
+                 [duratom "0.3.5"]]
 
   :plugins [[lein-environ "1.1.0"]
             [lein-asset-minifier "0.4.4"]]

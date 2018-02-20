@@ -1,5 +1,6 @@
 (ns demo.handler
   (:require [demo.ws :as ws]
+            [demo.db :as db]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.route :refer [not-found resources]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -8,8 +9,6 @@
             [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.reload :refer [wrap-reload]]
             [environ.core :refer [env]]))
-
-(def shared-db (atom {:count 0}))
 
 (def home-page
   (html
