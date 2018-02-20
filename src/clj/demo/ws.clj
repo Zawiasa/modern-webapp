@@ -1,17 +1,20 @@
 (ns demo.ws
   (:require [differ.core :as differ]
             [taoensso.sente :as sente]
-            [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)]
+            [org.httpkit.server :as http-kit]
+            [taoensso.sente.server-adapters.http-kit :refer (get-sch-adapter)]
             [clojure.core.async :as async :refer (go-loop <!)]))
 
-(let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
-              connected-uids]}
-      (sente/make-channel-socket! sente-web-server-adapter {})]
+(let [{:keys [ch-recv send-fn connected-uids
+              ajax-post-fn ajax-get-or-ws-handshake-fn]}
+      (sente/make-channel-socket! (get-sch-adapter) {})]
+
   (def ring-ajax-post                ajax-post-fn)
   (def ring-ajax-get-or-ws-handshake ajax-get-or-ws-handshake-fn)
   (def ch-chsk                       ch-recv) ; ChannelSocket's receive channel
   (def chsk-send!                    send-fn) ; ChannelSocket's send API fn
   (def connected-uids                connected-uids)) ; Watchable, read-only atom
+
 
 
 (defn broadcast

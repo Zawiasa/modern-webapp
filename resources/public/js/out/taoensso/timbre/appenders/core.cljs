@@ -1,71 +1,30 @@
 (ns taoensso.timbre.appenders.core
-  "Core Timbre appenders without any special dependency requirements. These can
-  be aliased into the main Timbre ns for convenience."
-  {:author "Peter Taoussanis"}
+  "Core Timbre appenders without any special dependency requirements.
+  These can be aliased into the main Timbre ns for convenience."
+  {:author "Peter Taoussanis (@ptaoussanis)"}
        
            
                             
-                                                       
+                                                    
 
         
   (:require
    [clojure.string  :as str]
-   [taoensso.encore :as enc    :refer () :refer-macros (have have?)]))
+   [taoensso.encore :as enc :refer-macros [have have?]]))
 
-;;;; TODO
-;; * Simple official rolling spit appender?
-
-;;;; Example appender
-
-#_
-(defn example-appender
-  "Docstring to explain any special opts to influence appender construction,
-  etc. Returns the appender map."
-  [& [{:keys [] :as opts}]]
-
-  {:enabled?   true  ; Please enable by default
-   :async?     false ; Use agent for appender dispatch? Useful for slow dispatch.
-   :min-level  nil   ; nil (no min level), or min logging level keyword
-   ;; :rate-limit nil
-   :rate-limit [[5   (enc/ms :mins  1)] ; 5 calls/min
-                [100 (enc/ms :hours 1)] ; 100 calls/hour
-                ]
-
-   :output-fn :inherit ; or a custom (fn [data]) -> string
-   :fn
-   (fn [data]
-     (let [;; See `timbre/example-config` for info on all available args:
-           {:keys [instant level ?err_ vargs_ output-fn
-                   config   ; Entire Timbre config map in effect
-                   appender ; Entire appender map in effect
-                   ]}
-           data
-
-           ;;; Use `force` to realise possibly-delayed args:
-           ?err  (force ?err_)  ; ?err non-nil iff first given arg was an error
-           vargs (force vargs_) ; Vector of raw args (excl. possible first error)
-
-           ;; You'll often want an output string with ns, timestamp, vargs, etc.
-           ;; A (fn [data]) -> string formatter is provided under the :output-fn
-           ;; key, defined as:
-           ;; `(or (:output-fn <this appender's map>)
-           ;;      (:output-fn <user's config map)
-           ;;      timbre/default-output-fn)`
-           ;;
-           ;; Users therefore get a standardized way to control appender ouput
-           ;; formatting for all participating appenders. See
-           ;; `taoensso.timbre/default-output-fn` source for details.
-           ;;
-           output-str (output-fn data)]
-       (println output-str)))})
-
-(comment (merge (example-appender) {:min-level :debug}))
+;; TODO Add a simple official rolling spit appender?
 
 ;;;; Println appender (clj & cljs)
 
                                                      
                                                       
                                       
+
+     
+                                     
+                                        
+
+                                                                       
 
 (defn println-appender
   "Returns a simple `println` appender for Clojure/Script.
@@ -90,80 +49,121 @@
      :output-fn  :inherit
      :fn
      (fn [data]
-       (let [{:keys [output-fn]} data]
-                (println (output-fn data))
+       (let [{:keys [output_]} data]
+                (println (force output_))
               
+                     
+                           
+                                                       
+                             
+                             
+                         
+
                                   
-                                                              
-                                    
-                                    
-                                
-                                                               ))}))
+                                                    
+                                                      ))}))
 
 (comment (println-appender))
 
 ;;;; Spit appender (clj only)
 
      
-                                      
-                                
-               
-                                  
-                                                
-                                                             
-                                                     
-
-     
                    
                                                       
-                                                       
+                            
+                                       
+                              
                    
                     
                   
                   
                        
       
-             
-                                    
+                  
+                                  
+           
+                                                                
+                                     
+                                             
+                                         
                                                      
-                                        
-                                                              
-                                           
+                                                     
+                                                                  
 
-(comment (spit-appender))
+                                                     
+                                                                       
+
+(comment
+  (spit-appender)
+  (let [f (:fn (spit-appender))]
+    (enc/qb 1000 (f {:output_ "boo"}))))
 
 ;;;; js/console appender (cljs only)
 
       
-(defn console-?appender
-  "Returns a simple js/console appender for ClojureScript, or nil if no
-  js/console exists."
-  []
-  (when-let [have-logger? (and (exists? js/console) (.-log js/console))]
-    (let [have-warn-logger?  (.-warn  js/console)
-          have-error-logger? (.-error js/console)
-          level->logger {:fatal (if have-error-logger? :error :info)
-                         :error (if have-error-logger? :error :info)
-                         :warn  (if have-warn-logger?  :warn  :info)}]
-      {:enabled?   true
-       :async?     false
-       :min-level  nil
-       :rate-limit nil
-       :output-fn  :inherit
-       :fn
+(defn console-appender
+  "Returns a simple js/console appender for ClojureScript.
+
+  For accurate line numbers in Chrome, add these Blackbox[1] patterns:
+    `/taoensso/timbre/appenders/core\\.js$`
+    `/taoensso/timbre\\.js$`
+    `/cljs/core\\.js$`
+
+  [1] Ref. https://goo.gl/ZejSvR"
+
+  ;; TODO Any way of using something like `Function.prototype.bind`
+  ;; (Ref. https://goo.gl/IZzkQB) to get accurate line numbers in all
+  ;; browsers w/o the need for Blackboxing?
+
+  [& [opts]]
+  {:enabled?   true
+   :async?     false
+   :min-level  nil
+   :rate-limit nil
+   :output-fn  :inherit
+   :fn
+   (if (exists? js/console)
+     (let [;; Don't cache this; some libs dynamically replace js/console
+           level->logger
+           (fn [level]
+             (or
+               (case level
+                 :trace  js/console.trace
+                 :debug  js/console.debug
+                 :info   js/console.info
+                 :warn   js/console.warn
+                 :error  js/console.error
+                 :fatal  js/console.error
+                 :report js/console.info)
+               js/console.log))]
+
        (fn [data]
-         (let [{:keys [level output-fn vargs_]} data
-               vargs      (force vargs_)
-               [v1 vnext] (enc/vsplit-first vargs)
-               output     (if (= v1 :timbre/raw)
-                            (into-array vnext)
-                            (output-fn data))]
+         (when-let [logger (level->logger (:level data))]
 
-           (case (level->logger level)
-             :error (.error js/console output)
-             :warn  (.warn  js/console output)
-                    (.log   js/console output))))})))
+           (if (or (:raw-console? data)
+                   (get-in data [:?meta :raw-console?])) ; Undocumented
 
-(comment (console-?appender))
+             (let [output
+                   ((:output-fn data)
+                    (assoc data
+                      :msg_  ""
+                      :?err nil))
+
+                   args ; (<output> ?<raw-error> <raw-arg1> <raw-arg2> ...)
+                   (let [vargs (:vargs data)]
+                     (if-let [err (:?err data)]
+                       (cons output (cons err vargs))
+                       (cons output           vargs)))]
+
+               (.apply logger js/console (into-array args)))
+             (.call    logger js/console (force (:output_ data)))))))
+
+     (fn [data] nil))})
+
+(comment (console-appender))
+
+;;;; Deprecated
+
+       (def console-?appender "DEPRECATED" console-appender)
 
 ;;;;;;;;;;;; This file autogenerated from src/taoensso/timbre/appenders/core.cljx

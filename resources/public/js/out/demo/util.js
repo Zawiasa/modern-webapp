@@ -1,4 +1,4 @@
-// Compiled by ClojureScript 1.7.122 {}
+// Compiled by ClojureScript 1.9.946 {}
 goog.provide('demo.util');
 goog.require('cljs.core');
 demo.util.foo_cljx = (function demo$util$foo_cljx(x){

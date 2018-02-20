@@ -1,6 +1,6 @@
 (ns taoensso.timbre
   "Simple, flexible logging for Clojure/Script. No XML."
-  {:author "Peter Taoussanis"}
+  {:author "Peter Taoussanis (@ptaoussanis)"}
        
            
                                
@@ -11,58 +11,51 @@
         
   (:require
    [clojure.string  :as str]
-   [taoensso.encore :as enc :refer () :refer-macros (have have?)]
+   [taoensso.encore :as enc :refer [] :refer-macros [have have?]]
    [taoensso.timbre.appenders.core :as core-appenders])
 
         
-  (:require-macros [taoensso.timbre :as timbre-macros :refer ()]))
+  (:require-macros
+   [taoensso.timbre :as timbre-macros :refer []]))
 
-;;;; Encore version check
-
-     
-                              
-                                                                            
-                                
-          
-              
-               
-                                                                                                                                                  
-                             
-                                             
+(if (vector? taoensso.encore/encore-version)
+  (enc/assert-min-encore-version [2 87 0])
+  (enc/assert-min-encore-version  2.87))
 
 ;;;; Config
 
      
                            
-                                
-                                    
-                                        
-                                                      
-                                                 
+                               
+                                           
+                                                    
+                                                                                 
 
 (declare stacktrace)
 (defn default-output-fn
   "Default (fn [data]) -> string output fn.
-  You can modify default options with `(partial default-output-fn <opts-map>)`."
-  ([data] (default-output-fn nil data))
-  ([{:keys [no-stacktrace? stacktrace-fonts] :as opts} data]
-   (let [{:keys [level ?err_ vargs_ msg_ ?ns-str hostname_ timestamp_]} data]
+  Use`(partial default-output-fn <opts-map>)` to modify default opts."
+  ([     data] (default-output-fn nil data))
+  ([opts data] ; For partials
+   (let [{:keys [no-stacktrace? stacktrace-fonts]} opts
+         {:keys [level ?err #_vargs msg_ ?ns-str ?file hostname_
+                 timestamp_ ?line]} data]
      (str
                                          
                                          
        (str/upper-case (name level))  " "
-       "[" (or ?ns-str "?ns") "] - "
+       "[" (or ?ns-str ?file "?") ":" (or ?line "?") "] - "
        (force msg_)
        (when-not no-stacktrace?
-         (when-let [err (force ?err_)]
+         (when-let [err ?err]
            (str "\n" (stacktrace err opts))))))))
 
 ;;; Alias core appenders here for user convenience
 (declare default-err default-out)
-                                                              
-                                                           
-       (def println-appender  core-appenders/println-appender)
-       (def console-?appender core-appenders/console-?appender)
+                                                             
+                                                          
+       (def println-appender core-appenders/println-appender)
+       (def console-appender core-appenders/console-appender)
 
 (def example-config
   "Example (+default) Timbre v4 config map.
@@ -71,44 +64,49 @@
     An appender is a map with keys:
       :min-level       ; Level keyword, or nil (=> no minimum level)
       :enabled?        ;
-      :async?          ; Dispatch using agent? Useful for slow appenders
+      :async?          ; Dispatch using agent? Useful for slow appenders (clj only)
       :rate-limit      ; [[ncalls-limit window-ms] <...>], or nil
       :output-fn       ; Optional override for inherited (fn [data]) -> string
+      :timestamp-opts  ; Optional override for inherited {:pattern _ :locale _ :timezone _} (clj only)
+      :ns-whitelist    ; Optional, stacks with active config's whitelist
+      :ns-blacklist    ; Optional, stacks with active config's blacklist
       :fn              ; (fn [data]) -> side effects, with keys described below
 
     An appender's fn takes a single data map with keys:
       :config          ; Entire config map (this map, etc.)
       :appender-id     ; Id of appender currently dispatching
       :appender        ; Entire map of appender currently dispatching
-
       :instant         ; Platform date (java.util.Date or js/Date)
       :level           ; Keyword
       :error-level?    ; Is level e/o #{:error :fatal}?
-      :?ns-str         ; String, or nil
-      :?file           ; String, or nil  ; Waiting on CLJ-865
+      :?ns-str         ; String,  or nil
+      :?file           ; String,  or nil
       :?line           ; Integer, or nil ; Waiting on CLJ-865
-
-      :?err_           ; Delay - first-arg platform error, or nil
-      :vargs_          ; Delay - raw args vector
-      :hostname_       ; Delay - string (clj only)
-      :msg_            ; Delay - args string
-      :timestamp_      ; Delay - string
+      :?err            ; First-arg platform error, or nil
+      :vargs           ; Vector of raw args
+      :output_         ; Forceable - final formatted output string created
+                       ; by calling (output-fn <this-data-map>)
+      :msg_            ; Forceable - args as a string
+      :timestamp_      ; Forceable - string (clj only)
+      :hostname_       ; Forceable - string (clj only)
       :output-fn       ; (fn [data]) -> formatted output string
                        ; (see `default-output-fn` for details)
-
       :context         ; *context* value at log time (see `with-context`)
-      :profile-stats   ; From `profile` macro
+
+      **NB** - any keys not specifically documented here should be
+      considered private / subject to change without notice.
 
   MIDDLEWARE
     Middleware are simple (fn [data]) -> ?data fns (applied left->right) that
-    transform the data map dispatched to appender fns. If any middleware returns
-    nil, NO dispatching will occur (i.e. the event will be filtered).
+    transform the data map dispatched to appender fns. If any middleware
+    returns nil, NO dispatch will occur (i.e. the event will be filtered).
 
   The `example-config` source code contains further settings and details.
   See also `set-config!`, `merge-config!`, `set-level!`."
 
   {:level :debug  ; e/o #{:trace :debug :info :warn :error :fatal :report}
 
+   ;; TODO Consider switching to `:ns-pattern` to match Tufte?
    ;; Control log filtering by namespaces/patterns. Useful for turning off
    ;; logging in noisy libraries, etc.:
    :ns-whitelist  [] #_["my-app.foo-ns"]
@@ -129,228 +127,260 @@
 
          
    {;; :println (println-appender {})
-    :console (console-?appender {})}})
+    :console (console-appender {})}})
 
 (comment
   (set-config! example-config)
   (infof "Hello %s" "world :-)"))
 
-(enc/defonce* ^:dynamic *config* "See `example-config` for info." example-config)
+(enc/defonce ^:dynamic *config* "See `example-config` for info." example-config)
                                                                                   
                                             
                                                                    
 
-(defn swap-config! [f]
-         (set!             *config* (f *config*))
-                                       )
+(defn swap-config! [f & args]
+         (set!                   *config* (apply f *config* args))
+                                                 )
 
 (defn   set-config! [m] (swap-config! (fn [_old] m)))
 (defn merge-config! [m] (swap-config! (fn [old] (enc/nested-merge old m))))
 
-(defn     set-level! [level] (swap-config! (fn [m] (merge m {:level level}))))
+(defn     set-level! [level] (swap-config! (fn [m] (assoc m :level level))))
                                    
-                                                                
+                                                              
 
 (comment (set-level! :info) *config*)
 
 ;;;; Levels
+;; Note that for historical reasons we don't make a distinction
+;; between form "level"s and config "min-level"s.
 
-(def ordered-levels [:trace :debug :info :warn :error :fatal :report])
-(def ^:private scored-levels (zipmap ordered-levels (next (range))))
-(def ^:private valid-levels  (set ordered-levels))
-(def ^:private valid-level
-  (fn [level]
-    (or (valid-levels level)
-        (throw (ex-info (str "Invalid logging level: " level) {:level level})))))
+(def ^:const -levels-vec [:trace :debug :info :warn :error :fatal :report])
+(def ^:const -levels-set (set    -levels-vec))
+(def ^:const -levels-map (zipmap -levels-vec (next (range))))
 
-(comment (valid-level :info))
+(defn valid-level? [x] (if (-levels-set x) true false))
+(defn valid-level  [x]
+  (or (-levels-set x)
+      (throw (ex-info "Invalid Timbre logging level" {:given x}))))
 
-(defn level>= [x y] (>= (long (scored-levels (valid-level x)))
-                        (long (scored-levels (valid-level y)))))
+(defn level>= [x y]
+  (>= ^long (-levels-map (valid-level x))
+      ^long (-levels-map (valid-level y))))
 
-(comment (qb 10000 (level>= :info :debug)))
+(comment (qb 1e6 (level>= :info :debug))) ; 81.25
 
-                                                                             
-                                       
-                                    
-                                               
-                                                       
+;;;; Namespace filtering
 
-;;;; ns filter
-
-(def ^:private compile-ns-filters
-  "(fn [whitelist blacklist]) -> (fn [ns]) -> ?unfiltered-ns"
-  (let [->re-pattern
-        (fn [x]
-          (enc/cond!
-            (enc/re-pattern? x) x
-            (string? x)
-            (let [s (-> (str "^" x "$")
-                        (str/replace "." "\\.")
-                        (str/replace "*" "(.*)"))]
-              (re-pattern s))))]
-
-    (enc/memoize_
-      (fn [whitelist blacklist]
-        (let [whitelist* (mapv ->re-pattern whitelist)
-              blacklist* (mapv ->re-pattern blacklist)
-
-              white-filter
-              (cond
-                ;; (nil? whitelist)  (fn [ns] false) ; Might be surprising
-                (empty?  whitelist*) (fn [ns] true)
-                :else (fn [ns] (some #(re-find % ns) whitelist*)))
-
-              black-filter
-              (cond
-                (empty? blacklist*) (fn [ns] true)
-                :else (fn [ns] (not (some #(re-find % ns) blacklist*))))]
-
-          (fn [ns] (when (and (white-filter ns) (black-filter ns)) ns)))))))
-
-(def ^:private ns-filter
-  "(fn [whitelist blacklist ns]) -> ?unfiltered-ns"
+(def ^:private -compile-ns-filter (enc/memoize_ enc/compile-ns-filter))
+(def ^:private          ns-filter
+  "Returns true iff given ns passes white/black lists."
   (enc/memoize_
-    (fn [whitelist blacklist ns]
-      ((compile-ns-filters whitelist blacklist) ns))))
+    (fn [whitelist blacklist ?ns]
+      ((-compile-ns-filter whitelist blacklist) ?ns))))
 
-(comment (qb 10000 (ns-filter ["foo.*"] ["foo.baz"] "foo.bar")))
+(comment
+  (qb 1e6 (ns-filter ["foo.*"] ["foo.baz"] "foo.bar")) ; 238.33
+  (ns-filter nil nil "")
+  (ns-filter nil nil nil))
+
+;;;; Combo filtering
 
      
-                                     
-                                                                           
-                                                                            
-
-                            
-                                                                                 
-                   
-                                                                               
-                   
-                                                                               
-
+                         
+                                        
                                              
-
-;;;; Utils
-
-(defn- ->delay [x] (if (delay? x) x (delay x)))
-(defn- vsplit-err1 [[v1 :as v]] (if-not (enc/error? v1) [nil v] (enc/vsplit-first v)))
-(comment
-  (vsplit-err1 [:a :b :c])
-  (vsplit-err1 [(Exception.) :a :b :c]))
-
-(defn default-data-hash-fn
-  "Used for rate limiters, some appenders (e.g. Carmine), etc.
-  Goal: (hash data-1) = (hash data-2) iff data-1 \"the same\" as data-2 for
-  rate-limiting purposes, etc."
-  [data]
-  (let [{:keys [?ns-str ?line vargs_]} data
-        vargs (force vargs_)]
-    (str
-      (or (some #(and (map? %) (:timbre/hash %)) vargs) ; Explicit hash given
-          #_[?ns-str ?line] ; TODO Waiting on http://goo.gl/cVVAYA
-          [?ns-str vargs]))))
-
-(comment (default-data-hash-fn {}))
+           
 
      
                                  
+                                                        
+                                                              
+                               
+                                                                    
+
+                               
+                                                           
+                            
+
+     
+                                     
+                                                             
+       
+                                 
+                                                                                
+
+                                      
+
+                         
+                                                                                      
+                                                                                       
+
+                                                   
+                                                                                 
+
+                                                   
+                                                                                 
+
+                                                 
+
+                                           
+                                      
+      
+        
+                      
+                                 
+                                                                        
+                                                
+
+                          
+                                                                     
+                                                
+
+(defn                       ^boolean may-log?
+  "Runtime check: would Timbre currently log at the given logging level?
+    * `?ns-str` arg required to support ns filtering
+    * `config`  arg required to support non-global config"
+  ([level                ] (may-log? level nil     nil))
+  ([level ?ns-str        ] (may-log? level ?ns-str nil))
+  ([level ?ns-str ?config]
+   (let [config    (or  ?config *config*)
+         min-level (get  config :level :report)]
+     (and
+       (level>= level min-level)
+       (boolean ; Resolves #206 (issue with slf4j-timbre)
+         (ns-filter
+           (get config :ns-whitelist)
+           (get config :ns-blacklist)
+           ?ns-str))
+       true))))
+
+(comment (qb 1e5 (may-log? :info))) ; 34.13
+
+;;;; Utils
+
+(declare get-hostname)
+
+(enc/compile-if (do enc/str-join true) ; Encore v2.29.1+ with transducers
+  (defn- str-join [xs]
+    (enc/str-join " "
+      (map
+        (fn [x]
+          (let [x (enc/nil->str x)] ; Undefined, nil -> "nil"
+            (cond
+              (record?          x) (pr-str x)
+              ;; (enc/lazy-seq? x) (pr-str x) ; Dubious?
+              :else x))))
+      xs))
+  (defn- str-join [xs] (str/join " "                 (filter identity xs))))
+
+(comment
+  (defrecord MyRec [x])
+  (str-join ["foo" (MyRec. "foo")]))
+
+     
+                                
                                                                       
 
 (comment (get-agent :my-appender))
 
-(enc/defonce* ^:private get-rate-limiter
-  (enc/memoize_ (fn [appender-id specs] (enc/rate-limiter* specs))))
+(defonce ^:private get-rate-limiter
+  (enc/memoize_ (fn [appender-id specs] (enc/limiter specs))))
 
 (comment (def rf (get-rate-limiter :my-appender [[10 5000]])))
 
 ;;;; Internal logging core
 
-(defn log?
-  "Would Timbre currently log at the given logging level?
-    * Compile-time `?ns-str` arg required to support ns filtering.
-    * `config` arg required to support non-global config."
-  [level & [?ns-str config]]
-  (let [config (or config *config*)
-        active-level (or (:level config) :report)]
-    (and (level>= level active-level)
-         (ns-filter (:ns-whitelist config) (:ns-blacklist config) (or ?ns-str ""))
-         true)))
+(def ^:dynamic *context* "General-purpose dynamic logging context" nil)
+                       
+                                                                     
+                                                              
+
+               
+                                                                        
+                             
+
+                                                          
+
+(defn- vrest [v] (if (> (count v) 1) (subvec v 1) []))
+(defn- parse-vargs
+  "vargs -> [?err ?meta ?msg-fmt api-vargs]"
+  [?err msg-type vargs]
+  (let [auto-error? (enc/kw-identical? ?err :auto)
+        fmt-msg?    (enc/kw-identical? msg-type :f)
+        [v0] vargs]
+
+    (if (and auto-error? (enc/error? v0))
+      (let [?err     v0
+            ?meta    nil
+            vargs    (vrest vargs)
+            ?msg-fmt (if fmt-msg? (let [[v0] vargs] v0) nil)
+            vargs    (if fmt-msg? (vrest vargs) vargs)]
+
+        [?err ?meta ?msg-fmt vargs])
+
+      (let [?meta    (if (and (map? v0) (:meta (meta v0))) v0 nil)
+            ?err     (or (:err ?meta) (if auto-error? nil ?err))
+            ?meta    (dissoc ?meta :err)
+            vargs    (if ?meta (vrest vargs) vargs)
+            ?msg-fmt (if fmt-msg? (let [[v0] vargs] v0) nil)
+            vargs    (if fmt-msg? (vrest vargs) vargs)]
+
+        [?err ?meta ?msg-fmt vargs]))))
 
 (comment
-  (set-level! :debug)
-  (log? :trace)
-  (with-level :trace (log? :trace))
-  (qb 10000 (log? :trace))       ; ~2.5ms
-  (qb 10000 (log? :trace "foo")) ; ~6ms
-  (qb 10000 (tracef "foo"))      ; ~7.5ms
-  (qb 10000 (when false "foo"))  ; ~0.5ms
+  (let [ex (Exception. "ex")]
+    (qb 10000
+      (parse-vargs :auto :f ["fmt" :a :b :c])
+      (parse-vargs :auto :p [ex    :a :b :c])
+      (parse-vargs :auto :p [^:meta {:foo :bar} :a :b :c])
+      (parse-vargs :auto :p [       {:foo :bar} :a :b :c])
+      (parse-vargs :auto :p [ex])
+      (parse-vargs :auto :p [^:meta {:err ex}   :a :b :c])))
+  ;; [2.79 2.51 6.13 1.65 1.94 6.2]
+  (infof                                 "Hi %s" "steve")
+  (infof ^:meta {:hash :bar}             "Hi %s" "steve")
+  (infof ^:meta {:err (Exception. "ex")} "Hi %s" "steve"))
 
-  ;;; Full benchmarks
-                                                
-                                                                            
+(defn -log! "Core low-level log fn. Implementation detail!"
 
-  (with-sole-appender {:enabled? true :fn (fn [data] nil)}
-    (qb 10000 (info "foo"))) ; ~88ms ; Time to delays ready
+  ;; TODO Temp workaround for
+  ;; https://github.com/fzakaria/slf4j-timbre/issues/20 and similar AOT tools
+  ([config level ?ns-str ?file ?line msg-type ?err vargs_ ?base-data]
+   ;; (throw (ex-info "Invalid internal Timbre call. Please try run `lein clean` to clear out-of-date build artifacts." {}))
+   (-log! config level ?ns-str ?file ?line msg-type ?err vargs_
+     ?base-data nil))
 
-  (with-sole-appender {:enabled? true :fn (fn [data] ((:output-fn data) data))}
-    (qb 10000 (info "foo"))) ; ~218ms ; Time to output ready
-  )
+  ([config level ?ns-str ?file ?line msg-type ?err vargs_
+    ?base-data callsite-id]
 
-(def ^:dynamic *context*
-  "General-purpose dynamic logging context. Context will be included in appender
-  data map at logging time." nil)
-                                                                               
-
-(declare get-hostname)
-
-(defn- inherit-over [k appender config default]
-  (or
-    (let [a (get appender k)] (when-not (enc/kw-identical? a :inherit) a))
-    (get config k)
-    default))
-
-(defn- inherit-into [k appender config default]
-  (merge default
-    (get config k)
-    (let [a (get appender k)] (when-not (enc/kw-identical? a :inherit) a))))
-
-(comment
-  (inherit-over :foo {:foo :inherit} {:foo :bar} nil)
-  (inherit-into :foo {:foo {:a :A :b :B :c :C}} {:foo {:a 1 :b 2 :c 3 :d 4}} nil))
-
-(defn log1-fn
-  "Core fn-level logger. Implementation detail!"
-  [config level ?ns-str ?file ?line msg-type vargs_ ?base-data]
-  (when (log? level ?ns-str config)
+  (when (may-log? level ?ns-str config)
     (let [instant (enc/now-dt)
-          vargs*_ (delay (vsplit-err1 (force vargs_)))
-          ?err_   (delay (get @vargs*_ 0))
-          vargs_  (delay (get @vargs*_ 1))
           context *context*
-          data    (merge ?base-data
-                    ;; No, better nest than merge (appenders may want to pass
-                    ;; along arb context w/o knowing context keys, etc.):
-                    (when (map? context) context) ; DEPRECATED, for back compat
-                    {:config  config ; Entire config!
-                     :context context
-                     :instant instant
-                     :level   level
-                     :?ns-str ?ns-str
-                     :?file   ?file
-                     :?line   ?line
-                     :?err_   ?err_
-                     :vargs_  vargs_
-                                                                  
-                     :error-level? (#{:error :fatal} level)})
-          msg-fn
-          (fn [vargs_] ; For use *after* middleware, etc.
-            (when-not (nil? msg-type)
-              (when-let [vargs (have [:or nil? vector?] (force vargs_))]
-                (case msg-type
-                  :p (enc/spaced-str vargs)
-                  :f (let [[fmt args] (enc/vsplit-first vargs)]
-                       (enc/format* fmt args))))))
-          ?data
+          vargs   @vargs_
+
+          [?err ?meta ?msg-fmt vargs]
+          (parse-vargs ?err msg-type vargs)
+
+          data ; Pre-middleware
+          (conj
+            (or ?base-data {})
+            {:instant instant
+             :level   level
+             :context context
+             :config  config ; Entire config!
+             :?ns-str ?ns-str
+             :?file   ?file
+             :?line   ?line
+                                                          
+             :error-level? (#{:error :fatal} level)
+             :?err     ?err
+             :?err_    (delay ?err) ; Deprecated
+             :?meta    ?meta        ; Undocumented
+             :?msg-fmt ?msg-fmt     ; Undocumented
+             :vargs    vargs})
+
+          ?data ; Post middleware
           (reduce ; Apply middleware: data->?data
             (fn [acc mf]
               (let [result (mf acc)]
@@ -361,117 +391,238 @@
             (:middleware config))]
 
       (when-let [data ?data] ; Not filtered by middleware
-        (reduce-kv
-          (fn [_ id appender]
-            (when (and (:enabled? appender)
-                       (level>= level (or (:min-level appender) :trace)))
+        (let [{:keys [vargs]} data
+              data (assoc data :vargs_ (delay vargs)) ; Deprecated
+              data
+              (enc/assoc-nx data
+                :msg_
+                (delay
+                  (case msg-type
+                    nil ""
+                    :p  (str-join vargs)
+                    :f  #_(enc/format* (have string? ?msg-fmt) vargs)
+                    (do
+                      (when-not (string? ?msg-fmt)
+                        (throw
+                          (ex-info "Timbre format-style logging call without a format pattern (string)"
+                            #_data
+                            {:level    level
+                             :location (str (or ?ns-str ?file "?") ":"
+                                            (or ?line         "?"))})))
 
-              (let [rate-limit-specs (:rate-limit appender)
-                    data-hash-fn (inherit-over :data-hash-fn appender config
-                                   default-data-hash-fn)
-                    rate-limit-okay?
-                    (or (empty? rate-limit-specs)
-                        (let [rl-fn     (get-rate-limiter id rate-limit-specs)
-                              data-hash (data-hash-fn data)]
-                          (not (rl-fn data-hash))))]
+                      (enc/format* ?msg-fmt vargs))))
 
-                (when rate-limit-okay?
-                  (let [{:keys [async?] apfn :fn} appender
-                        msg_      (delay (or (msg-fn (:vargs_ data)) #_""))
-                        output-fn (inherit-over :output-fn appender config
-                                    default-output-fn)
+                ;; Uniquely identifies a particular logging call for
+                ;; rate limiting, etc.
+                :hash_
+                (delay
+                  (hash
+                    ;; Nb excl. instant
+                    [callsite-id      ; Only useful for direct macro calls
+                     ?msg-fmt
+                     (get ?meta :hash ; Explicit hash provided
+                       vargs)])))
 
-                                        
-                             
+              ;; Optimization: try maximize output+timestamp sharing
+              ;; between appenders
+              output-fn1 (enc/memoize_ (get config :output-fn default-output-fn))
+                                                                                                    
+                                   ; (fn [timestamp-opts]) -> Shared delay
+                   
+                           
+                         
+                       
+                                                               
+                            
+                                                 
+                                                                       
+                                         ]
+
+          (reduce-kv
+           (fn [_ id appender]
+             (when (and (:enabled? appender)
+                        (level>= level (or (:min-level appender) :trace)))
+
+               ;; Appender ns filter stacks with main config's ns filter:
+               (when (ns-filter (:ns-whitelist appender)
+                                (:ns-blacklist appender)
+                                ?ns-str)
+
+                 (let [rate-limit-specs (:rate-limit appender)
+                       rate-limit-okay?
+                       (or
+                        (empty? rate-limit-specs)
+                        (let [rl-fn (get-rate-limiter id rate-limit-specs)]
+                          (not (rl-fn (force (:hash_ data))))))]
+
+                   (when rate-limit-okay?
+                     (let [{:keys [async?] apfn :fn} appender
+
+                           output-fn
+                           (let [f (:output-fn appender)]
+                             (if (or (nil? f) (enc/kw-identical? f :inherit))
+                               output-fn1
+                               f))
+
+                                           
+                                
+                                                                 
+                                                                                   
+                                                                     
+                                                                             
+
+                           output_
+                           (delay
+                            (output-fn
+                                                                       
+                                    data))
+
+                           data
+                           (conj data
+                             {:appender-id id
+                              :appender    appender
+                              :output-fn   output-fn
+                              :output_     output_
+                                                                })
+
+                           ?data ; Final data prep before going to appender
+                           (if-let [mfn (:middleware-fn appender)]
+                             (mfn data) ; Deprecated, undocumented
+                             data)]
+
+                       (when-let [data ?data] ; Not filtered by middleware
+
+                         ;; NB Unless `async?`, we currently allow appenders
+                         ;; to throw since it's not particularly obvious
+                         ;; how/where we should report problems. Throwing
+                         ;; early seems preferable to just silently dropping
+                         ;; errors. In effect, we currently require appenders
+                         ;;  to take responsibility over appropriate trapping.
+
+                                (apfn data)
                               
-                                                                            
-                                                                
-                                                                        
-                                                                                 
-                                                                    
-                                                                           
-                                                
-
-                        data ; Final data prep before going to appender
-                        (merge data
-                          {:appender-id  id
-                           :appender     appender
-                           ;; :appender-opts (:opts appender) ; For convenience
-                           :msg_         msg_
-                           :msg-fn       msg-fn
-                           :output-fn    output-fn
-                           :data-hash-fn data-hash-fn
-                                                             })]
-
-                    (if-not async?
-                      (apfn data) ; Allow errors to throw
-                             (apfn data)
-                                                                           ))))))
-          nil
-          (enc/clj1098 (:appenders config))))))
-  nil)
+                                   
+                                                                         
+                                       )))))))
+           nil
+           (:appenders config))))))
+  nil))
 
 (comment
-  (log1-fn *config* :info nil nil nil :p (delay [(do (println "hi") :x) :y]) nil))
+  (-log! *config* :info nil nil nil :p :auto
+    (delay [(do (println "hi") :x) :y]) nil "callsite-id"))
 
-                    
-                                                   
-                                             
+                                                      
 
-                          
+                                              
+                                                     
+
+                                                     
+                                                
+                                                                             
+
+                                                            
+                                         
+                                
+                                                                   
+                                                        
+                                                
                                      
-                                                                 
+                                                       
+                                                    
+                                                            
+                                 
+                                             
                                                
 
-                                             
+                                                            
 
-                             
-                                                                      
-                                                                          
-                                        
-                                                                
-                                            
+                                                                            
+                                                                             
+                                     
+                       
+                                                                     
+                                                
 
-;;;; API-level stuff
+                                                                     
+                                                         
+
+(comment
+  (log! :info :p ["foo"])
+  (macroexpand '(log! :info :p ["foo"]))
+  (macroexpand '(log! :info :p ["foo"] {:?line 42})))
+
+;;;; Benchmarking
+
+(comment
+  (set-level! :debug)
+  (may-log? :trace)
+  (with-level :trace (log? :trace))
+  (qb 10000
+    (may-log? :trace)
+    (may-log? :trace "foo")
+    (tracef "foo")
+    (when false "foo"))
+  ;; [1.38 1.42 2.08 0.26]
+
+                                                
+                                                                            
+
+  (with-sole-appender {:enabled? true :fn (fn [data] nil)}
+    (qb 10000 (info "foo"))) ; ~74.58 ; Time to delays ready
+
+  (with-sole-appender {:enabled? true :fn (fn [data] (force (:output_ data)))}
+    (qb 10000 (info "foo"))) ; ~136.68 ; Time to output ready
+  )
+
+;;;; Main public API-level stuff
+;; TODO Have a bunch of cruft here trying to work around CLJ-865 to some extent
 
 ;;; Log using print-style args
-                                                                             
-                                                                             
-                                                                             
-                                                                             
-                                                                             
-                                                                             
-                                                                             
-                                                                             
-                                                                             
+                                                                                                      
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
 
 ;;; Log using format-style args
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-                                                                              
+                                                                                                      
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
+                                                                                       
 
 (comment
   (infof "hello %s" "world")
   (infof (Exception.) "hello %s" "world")
   (infof (Exception.)))
 
+                                    
+                               
+        
                              
-                                                      
-                                       
-               
+                                               
 
-                                         
-                                                      
-                                                  
-               
+                                                
+                               
+        
+                             
+                                            
+                    
 
-                                                               
+                                                                              
+
+                                                                                           
+                                                                                           
+                                                                                           
 
      
                                      
@@ -493,32 +644,26 @@
   (logged-future          (/ 0))
   (handle-uncaught-jvm-exceptions!))
 
+                                             
+                                  
+                         
+                             
+                                                            
+                                                                           
+
+                                 
+                 
+
              
                                                                              
                                                                        
-                                                
-                                                       
-                                                               
-                           
-                           
-                          
-                                                                     
-                                        
-            
+                                                                                
+                                                                                
+                                                                                
+                                                                                 
 
-                                                             
-                 
-                         
-                                                         
-                                         
-                                                
-                                                        
-                                                                    
-
-(comment
-  (macroexpand '(log-env))
-  (defn foo [x y] (log-env) (+ x y))
-  (foo 5 10))
+                                    
+(comment ((fn foo [x y] (get-env)) 5 10))
 
      
                   
@@ -526,16 +671,16 @@
                                        
                                                                         
                                                                          
-                                           
-                                                    
-                                                      
+                                            
     
                                        
                                                                         
                                                                          
                                            
+
+                                          
                                                     
-                                                      
+                                             
 
 ;;;; Misc public utils
 
@@ -554,28 +699,49 @@
                                                            
 
      
-                 
-                                                                      
-                                
-          
+                    
+                                                               
+                                                           
+                                                      
+
+                                                                    
+                                                                             
+                                                                           
+                                                           
+                      
+                                                            
+         
+
+                                                     
+                                  
                                                                      
-                                                                        
-                                                                              
-                                         
 
 (comment (get-hostname))
 
-(defn stacktrace [err & [{:keys [stacktrace-fonts] :as opts}]]
-         (str err) ; TODO Alternatives?
-       
-                                                         
-                                                                     
-                                                
-                                    
-                                                                        
-                                       )
+     
+                                       
+                                                          
+           
 
-(comment (stacktrace (Exception. "Boo") {:stacktrace-fonts nil}))
+(defn stacktrace
+  ([err     ] (stacktrace err nil))
+  ([err opts]
+          (str err) ; TODO Alternatives?
+        
+                                                       
+                                                  
+                                  
+                                
+                 
+                         
+                                     
+
+                                     
+                                        
+                                              
+                                               ))
+
+(comment (stacktrace (Exception. "Boo") {:stacktrace-fonts {}}))
 
                                                      
                       
@@ -584,9 +750,19 @@
 
 ;;;; Deprecated
 
-(defn str-println [& xs] (enc/spaced-str xs))
-                                                                            
-                                                                            
-(defn logging-enabled? [level compile-time-ns] (log? level (str compile-time-ns)))
+(enc/deprecated
+         (def console-?appender core-appenders/console-appender)
+  (def ordered-levels -levels-vec)
+  (def log? may-log?)
+  (defn logging-enabled? [level compile-time-ns] (may-log? level (str compile-time-ns)))
+  (defn str-println      [& xs] (str-join xs))
+                                                                              
+                                                                              
+                                        
+                   
+                                           
+                                                  
+                                                          
+                                                                      )
 
 ;;;;;;;;;;;; This file autogenerated from src/taoensso/timbre.cljx

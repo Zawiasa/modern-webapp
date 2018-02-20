@@ -4,25 +4,25 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [differ "0.2.1"]
-                 [http-kit "2.1.19"]
-                 [reagent "0.5.1"]
-                 [reagent-forms "0.5.11"]
-                 [reagent-utils "0.1.5"]
-                 [re-frame "0.4.1"]
-                 [ring "1.4.0"]
-                 [ring/ring-defaults "0.1.5"]
-                 [prone "0.8.2"]
-                 [compojure "1.4.0"]
-                 [hiccup "1.0.5"]
-                 [environ "1.0.1"]
-                 [org.clojure/clojurescript "1.7.122" :scope "provided"]
-                 [secretary "1.2.3"]
-                 [com.taoensso/sente  "1.7.0-beta2"]]
+  :dependencies [[org.clojure/clojure "1.9.0"]
 
-  :plugins [[lein-environ "1.0.1"]
-            [lein-asset-minifier "0.2.2"]]
+                 [http-kit "2.2.0"]
+                 [reagent "0.8.0-alpha2"]
+                 [reagent-utils "0.3.0"]
+                 [re-frame "0.10.5"]
+                 [differ "0.3.2"]
+                 [ring "1.6.3"]
+                 [ring/ring-defaults "0.3.1"]
+                 [prone "1.5.0"]
+                 [compojure "1.6.0"]
+                 [hiccup "1.0.5"]
+                 [environ "1.1.0"]
+                 [org.clojure/clojurescript "1.9.946"]
+                 [secretary "1.2.3"]
+                 [com.taoensso/sente "1.12.0"]]
+
+  :plugins [[lein-environ "1.1.0"]
+            [lein-asset-minifier "0.4.4"]]
 
   :ring {:handler demo.handler/app
          :uberwar-name "demo.war"}
@@ -50,17 +50,19 @@
                                         :optimizations :none
                                         :pretty-print  true}}}}
 
-  :profiles {:dev {:repl-options {:init-ns demo.repl}
+  :profiles {:dev {:repl-options {:init-ns demo.repl
+                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
 
-                   :dependencies [[ring/ring-mock "0.3.0"]
+                   :dependencies [[ring/ring-mock "0.3.2"]
                                   [ring/ring-devel "1.4.0"]
-                                  [lein-figwheel "0.4.0"]
-                                  [org.clojure/tools.nrepl "0.2.11"]
+                                  [lein-figwheel "0.5.14"]
+                                  [org.clojure/tools.nrepl "0.2.10"]
+                                  [com.cemerick/piggieback "0.2.2"]
                                   [pjstadig/humane-test-output "0.7.0"]]
 
                    :source-paths ["env/dev/clj"]
-                   :plugins [[lein-figwheel "0.4.0"]
-                             [lein-cljsbuild "1.0.6"]]
+                   :plugins [[lein-figwheel "0.5.14"]
+                             [lein-cljsbuild "1.1.7"]]
 
                    :injections [(require 'pjstadig.humane-test-output)
                                 (pjstadig.humane-test-output/activate!)]

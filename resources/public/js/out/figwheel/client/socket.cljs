@@ -1,22 +1,30 @@
 (ns figwheel.client.socket
   (:require
+   [goog.object :as gobj]
    [figwheel.client.utils :as utils]
    [cljs.reader :refer [read-string]]))
 
 (defn get-websocket-imp []
-  (cond
-    (utils/html-env?) (aget js/window "WebSocket")
-    (utils/node-env?) (try (js/require "ws")
-                           (catch js/Error e
-                             nil))
-    :else nil))
+  (or
+   (gobj/get goog.global "FIGWHEEL_WEBSOCKET_CLASS")
+   (gobj/get goog.global "WebSocket")
+   (cond
+     ;; TODO remove
+     (utils/html-or-react-native-env?) (gobj/get js/window "WebSocket")
+     (utils/node-env?) (try (js/require "ws")
+                            (catch js/Error e
+                              nil))
+     ;; TODO remove
+     (utils/worker-env?) (gobj/get js/self "WebSocket")
+     :else nil)))
+
 
 ;; messages have the following formats
 
 ;; files-changed message
 ;; { :msg-name :files-changed
 ;;   :files    [{:file "/js/compiled/out/example/core.js",
-;;               :type :javascript, 
+;;               :type :javascript,
 ;;               :msg-name :file-changed,
 ;;               :namespace "example.core" }] }
 
@@ -46,6 +54,15 @@
   (set! (.-onclose @socket-atom) identity)
   (.close @socket-atom))
 
+(defn handle-incoming-message [msg]
+  (utils/debug-prn msg)
+  (and (map? msg)
+       (:msg-name msg)
+       ;; don't forward pings
+       (not= (:msg-name msg) :ping)
+       (swap! message-history-atom
+              conj msg)))
+
 (defn open [{:keys [retry-count retried-count websocket-url build-id] :as opts}]
   (if-let [WebSocket (get-websocket-imp)]
     (do
@@ -53,14 +70,9 @@
       (let [url (str websocket-url (if build-id (str "/" build-id) ""))
             socket (WebSocket. url)]
         (set! (.-onmessage socket) (fn [msg-str]
-                                     (when-let [msg (read-string (.-data msg-str))]
-                                       (utils/debug-prn msg)
-                                       (and (map? msg)
-                                            (:msg-name msg)
-                                            ;; don't forward pings
-                                            (not= (:msg-name msg) :ping)
-                                            (swap! message-history-atom
-                                                   conj msg)))))
+                                     (when-let [msg
+                                                (read-string (.-data msg-str))]
+                                       (#'handle-incoming-message msg))))
         (set! (.-onopen socket)  (fn [x]
                                    (reset! socket-atom socket)
                                    (when (utils/html-env?)
@@ -70,7 +82,7 @@
                                    (let [retried-count (or retried-count 0)]
                                      (utils/debug-prn "Figwheel: socket closed or failed to open")
                                      (when (> retry-count retried-count)
-                                       (js/setTimeout 
+                                       (js/setTimeout
                                         (fn []
                                           (open
                                            (assoc opts :retried-count (inc retried-count))))

@@ -1,32 +1,36 @@
-// Compiled by ClojureScript 1.7.122 {}
+// Compiled by ClojureScript 1.9.946 {}
 goog.provide('differ.patch');
 goog.require('cljs.core');
 goog.require('clojure.set');
-differ.patch.alterations;
 
-differ.patch.removals;
 differ.patch.map_alterations = (function differ$patch$map_alterations(state,diff){
-var G__32235 = cljs.core.keys.call(null,diff);
-var vec__32236 = G__32235;
-var k = cljs.core.nth.call(null,vec__32236,(0),null);
-var ks = cljs.core.nthnext.call(null,vec__32236,(1));
+var G__52910 = cljs.core.keys.call(null,diff);
+var vec__52911 = G__52910;
+var seq__52912 = cljs.core.seq.call(null,vec__52911);
+var first__52913 = cljs.core.first.call(null,seq__52912);
+var seq__52912__$1 = cljs.core.next.call(null,seq__52912);
+var k = first__52913;
+var ks = seq__52912__$1;
 var result = cljs.core.transient$.call(null,state);
-var G__32235__$1 = G__32235;
+var G__52910__$1 = G__52910;
 var result__$1 = result;
 while(true){
-var vec__32237 = G__32235__$1;
-var k__$1 = cljs.core.nth.call(null,vec__32237,(0),null);
-var ks__$1 = cljs.core.nthnext.call(null,vec__32237,(1));
+var vec__52914 = G__52910__$1;
+var seq__52915 = cljs.core.seq.call(null,vec__52914);
+var first__52916 = cljs.core.first.call(null,seq__52915);
+var seq__52915__$1 = cljs.core.next.call(null,seq__52915);
+var k__$1 = first__52916;
+var ks__$1 = seq__52915__$1;
 var result__$2 = result__$1;
 if(cljs.core.not.call(null,k__$1)){
-return cljs.core.persistent_BANG_.call(null,result__$2);
+return cljs.core.with_meta.call(null,cljs.core.persistent_BANG_.call(null,result__$2),cljs.core.meta.call(null,state));
 } else {
 var old_val = cljs.core.get.call(null,result__$2,k__$1);
 var diff_val = cljs.core.get.call(null,diff,k__$1);
-var G__32238 = ks__$1;
-var G__32239 = cljs.core.assoc_BANG_.call(null,result__$2,k__$1,differ.patch.alterations.call(null,old_val,diff_val));
-G__32235__$1 = G__32238;
-result__$1 = G__32239;
+var G__52917 = ks__$1;
+var G__52918 = cljs.core.assoc_BANG_.call(null,result__$2,k__$1,differ.patch.alterations.call(null,old_val,diff_val));
+G__52910__$1 = G__52917;
+result__$1 = G__52918;
 continue;
 }
 break;
@@ -34,69 +38,85 @@ break;
 });
 differ.patch.vec_alterations = (function differ$patch$vec_alterations(state,diff){
 var idx = (0);
-var G__32250 = state;
-var vec__32252 = G__32250;
-var old_val = cljs.core.nth.call(null,vec__32252,(0),null);
-var old_rest = cljs.core.nthnext.call(null,vec__32252,(1));
-var old_coll = vec__32252;
-var G__32251 = diff;
-var vec__32253 = G__32251;
-var diff_idx = cljs.core.nth.call(null,vec__32253,(0),null);
-var diff_val = cljs.core.nth.call(null,vec__32253,(1),null);
-var diff_rest = cljs.core.nthnext.call(null,vec__32253,(2));
-var diff_coll = vec__32253;
+var G__52925 = state;
+var vec__52927 = G__52925;
+var seq__52928 = cljs.core.seq.call(null,vec__52927);
+var first__52929 = cljs.core.first.call(null,seq__52928);
+var seq__52928__$1 = cljs.core.next.call(null,seq__52928);
+var old_val = first__52929;
+var old_rest = seq__52928__$1;
+var old_coll = vec__52927;
+var G__52926 = diff;
+var vec__52930 = G__52926;
+var seq__52931 = cljs.core.seq.call(null,vec__52930);
+var first__52932 = cljs.core.first.call(null,seq__52931);
+var seq__52931__$1 = cljs.core.next.call(null,seq__52931);
+var diff_idx = first__52932;
+var first__52932__$1 = cljs.core.first.call(null,seq__52931__$1);
+var seq__52931__$2 = cljs.core.next.call(null,seq__52931__$1);
+var diff_val = first__52932__$1;
+var diff_rest = seq__52931__$2;
+var diff_coll = vec__52930;
 var result = cljs.core.transient$.call(null,cljs.core.PersistentVector.EMPTY);
 var idx__$1 = idx;
-var G__32250__$1 = G__32250;
-var G__32251__$1 = G__32251;
+var G__52925__$1 = G__52925;
+var G__52926__$1 = G__52926;
 var result__$1 = result;
 while(true){
 var idx__$2 = idx__$1;
-var vec__32254 = G__32250__$1;
-var old_val__$1 = cljs.core.nth.call(null,vec__32254,(0),null);
-var old_rest__$1 = cljs.core.nthnext.call(null,vec__32254,(1));
-var old_coll__$1 = vec__32254;
-var vec__32255 = G__32251__$1;
-var diff_idx__$1 = cljs.core.nth.call(null,vec__32255,(0),null);
-var diff_val__$1 = cljs.core.nth.call(null,vec__32255,(1),null);
-var diff_rest__$1 = cljs.core.nthnext.call(null,vec__32255,(2));
-var diff_coll__$1 = vec__32255;
+var vec__52933 = G__52925__$1;
+var seq__52934 = cljs.core.seq.call(null,vec__52933);
+var first__52935 = cljs.core.first.call(null,seq__52934);
+var seq__52934__$1 = cljs.core.next.call(null,seq__52934);
+var old_val__$1 = first__52935;
+var old_rest__$1 = seq__52934__$1;
+var old_coll__$1 = vec__52933;
+var vec__52936 = G__52926__$1;
+var seq__52937 = cljs.core.seq.call(null,vec__52936);
+var first__52938 = cljs.core.first.call(null,seq__52937);
+var seq__52937__$1 = cljs.core.next.call(null,seq__52937);
+var diff_idx__$1 = first__52938;
+var first__52938__$1 = cljs.core.first.call(null,seq__52937__$1);
+var seq__52937__$2 = cljs.core.next.call(null,seq__52937__$1);
+var diff_val__$1 = first__52938__$1;
+var diff_rest__$1 = seq__52937__$2;
+var diff_coll__$1 = vec__52936;
 var result__$2 = result__$1;
 var old_empty_QMARK_ = cljs.core.empty_QMARK_.call(null,old_coll__$1);
 var diff_empty_QMARK_ = cljs.core.empty_QMARK_.call(null,diff_coll__$1);
 if((old_empty_QMARK_) && (diff_empty_QMARK_)){
-return cljs.core.persistent_BANG_.call(null,result__$2);
+return cljs.core.with_meta.call(null,cljs.core.persistent_BANG_.call(null,result__$2),cljs.core.meta.call(null,state));
 } else {
 if(diff_empty_QMARK_){
-var G__32256 = (idx__$2 + (1));
-var G__32257 = old_rest__$1;
-var G__32258 = diff_rest__$1;
-var G__32259 = cljs.core.conj_BANG_.call(null,result__$2,old_val__$1);
-idx__$1 = G__32256;
-G__32250__$1 = G__32257;
-G__32251__$1 = G__32258;
-result__$1 = G__32259;
+var G__52939 = (idx__$2 + (1));
+var G__52940 = old_rest__$1;
+var G__52941 = diff_rest__$1;
+var G__52942 = cljs.core.conj_BANG_.call(null,result__$2,old_val__$1);
+idx__$1 = G__52939;
+G__52925__$1 = G__52940;
+G__52926__$1 = G__52941;
+result__$1 = G__52942;
 continue;
 } else {
 if((cljs.core._EQ_.call(null,idx__$2,diff_idx__$1)) || (old_empty_QMARK_)){
-var G__32260 = (idx__$2 + (1));
-var G__32261 = old_rest__$1;
-var G__32262 = diff_rest__$1;
-var G__32263 = cljs.core.conj_BANG_.call(null,result__$2,differ.patch.alterations.call(null,old_val__$1,diff_val__$1));
-idx__$1 = G__32260;
-G__32250__$1 = G__32261;
-G__32251__$1 = G__32262;
-result__$1 = G__32263;
+var G__52943 = (idx__$2 + (1));
+var G__52944 = old_rest__$1;
+var G__52945 = diff_rest__$1;
+var G__52946 = cljs.core.conj_BANG_.call(null,result__$2,differ.patch.alterations.call(null,old_val__$1,diff_val__$1));
+idx__$1 = G__52943;
+G__52925__$1 = G__52944;
+G__52926__$1 = G__52945;
+result__$1 = G__52946;
 continue;
 } else {
-var G__32264 = (idx__$2 + (1));
-var G__32265 = old_rest__$1;
-var G__32266 = diff_coll__$1;
-var G__32267 = cljs.core.conj_BANG_.call(null,result__$2,old_val__$1);
-idx__$1 = G__32264;
-G__32250__$1 = G__32265;
-G__32251__$1 = G__32266;
-result__$1 = G__32267;
+var G__52947 = (idx__$2 + (1));
+var G__52948 = old_rest__$1;
+var G__52949 = diff_coll__$1;
+var G__52950 = cljs.core.conj_BANG_.call(null,result__$2,old_val__$1);
+idx__$1 = G__52947;
+G__52925__$1 = G__52948;
+G__52926__$1 = G__52949;
+result__$1 = G__52950;
 continue;
 
 }
@@ -116,11 +136,11 @@ if((cljs.core.sequential_QMARK_.call(null,state)) && (cljs.core.sequential_QMARK
 if(cljs.core.vector_QMARK_.call(null,diff)){
 return differ.patch.vec_alterations.call(null,state,diff);
 } else {
-return cljs.core.into.call(null,cljs.core.List.EMPTY,cljs.core.reverse.call(null,differ.patch.vec_alterations.call(null,state,diff)));
+return cljs.core.with_meta.call(null,cljs.core.into.call(null,cljs.core.List.EMPTY,cljs.core.reverse.call(null,differ.patch.vec_alterations.call(null,state,diff))),cljs.core.meta.call(null,state));
 }
 } else {
 if((cljs.core.set_QMARK_.call(null,state)) && (cljs.core.set_QMARK_.call(null,diff))){
-return clojure.set.union.call(null,state,diff);
+return cljs.core.with_meta.call(null,clojure.set.union.call(null,state,diff),cljs.core.meta.call(null,state));
 } else {
 return diff;
 
@@ -129,34 +149,40 @@ return diff;
 }
 });
 differ.patch.map_removals = (function differ$patch$map_removals(state,diff){
-var G__32273 = cljs.core.keys.call(null,diff);
-var vec__32274 = G__32273;
-var k = cljs.core.nth.call(null,vec__32274,(0),null);
-var ks = cljs.core.nthnext.call(null,vec__32274,(1));
+var G__52954 = cljs.core.keys.call(null,diff);
+var vec__52955 = G__52954;
+var seq__52956 = cljs.core.seq.call(null,vec__52955);
+var first__52957 = cljs.core.first.call(null,seq__52956);
+var seq__52956__$1 = cljs.core.next.call(null,seq__52956);
+var k = first__52957;
+var ks = seq__52956__$1;
 var result = cljs.core.transient$.call(null,state);
-var G__32273__$1 = G__32273;
+var G__52954__$1 = G__52954;
 var result__$1 = result;
 while(true){
-var vec__32275 = G__32273__$1;
-var k__$1 = cljs.core.nth.call(null,vec__32275,(0),null);
-var ks__$1 = cljs.core.nthnext.call(null,vec__32275,(1));
+var vec__52958 = G__52954__$1;
+var seq__52959 = cljs.core.seq.call(null,vec__52958);
+var first__52960 = cljs.core.first.call(null,seq__52959);
+var seq__52959__$1 = cljs.core.next.call(null,seq__52959);
+var k__$1 = first__52960;
+var ks__$1 = seq__52959__$1;
 var result__$2 = result__$1;
 if(cljs.core.not.call(null,k__$1)){
-return cljs.core.persistent_BANG_.call(null,result__$2);
+return cljs.core.with_meta.call(null,cljs.core.persistent_BANG_.call(null,result__$2),cljs.core.meta.call(null,state));
 } else {
 var old_val = cljs.core.get.call(null,result__$2,k__$1);
 var diff_val = cljs.core.get.call(null,diff,k__$1);
 if(cljs.core._EQ_.call(null,(0),diff_val)){
-var G__32276 = ks__$1;
-var G__32277 = cljs.core.dissoc_BANG_.call(null,result__$2,k__$1);
-G__32273__$1 = G__32276;
-result__$1 = G__32277;
+var G__52961 = ks__$1;
+var G__52962 = cljs.core.dissoc_BANG_.call(null,result__$2,k__$1);
+G__52954__$1 = G__52961;
+result__$1 = G__52962;
 continue;
 } else {
-var G__32278 = ks__$1;
-var G__32279 = cljs.core.assoc_BANG_.call(null,result__$2,k__$1,differ.patch.removals.call(null,old_val,diff_val));
-G__32273__$1 = G__32278;
-result__$1 = G__32279;
+var G__52963 = ks__$1;
+var G__52964 = cljs.core.assoc_BANG_.call(null,result__$2,k__$1,differ.patch.removals.call(null,old_val,diff_val));
+G__52954__$1 = G__52963;
+result__$1 = G__52964;
 continue;
 }
 }
@@ -164,63 +190,83 @@ break;
 }
 });
 differ.patch.vec_removals = (function differ$patch$vec_removals(state,diff){
+if(cljs.core.not.call(null,cljs.core.seq.call(null,diff))){
+return state;
+} else {
 var max_index = (cljs.core.count.call(null,state) - cljs.core.first.call(null,diff));
 var index = (0);
-var G__32290 = state;
-var vec__32292 = G__32290;
-var old_val = cljs.core.nth.call(null,vec__32292,(0),null);
-var old_rest = cljs.core.nthnext.call(null,vec__32292,(1));
-var old_coll = vec__32292;
-var G__32291 = cljs.core.rest.call(null,diff);
-var vec__32293 = G__32291;
-var diff_index = cljs.core.nth.call(null,vec__32293,(0),null);
-var diff_val = cljs.core.nth.call(null,vec__32293,(1),null);
-var diff_rest = cljs.core.nthnext.call(null,vec__32293,(2));
-var diff_coll = vec__32293;
+var G__52971 = state;
+var vec__52973 = G__52971;
+var seq__52974 = cljs.core.seq.call(null,vec__52973);
+var first__52975 = cljs.core.first.call(null,seq__52974);
+var seq__52974__$1 = cljs.core.next.call(null,seq__52974);
+var old_val = first__52975;
+var old_rest = seq__52974__$1;
+var old_coll = vec__52973;
+var G__52972 = cljs.core.rest.call(null,diff);
+var vec__52976 = G__52972;
+var seq__52977 = cljs.core.seq.call(null,vec__52976);
+var first__52978 = cljs.core.first.call(null,seq__52977);
+var seq__52977__$1 = cljs.core.next.call(null,seq__52977);
+var diff_index = first__52978;
+var first__52978__$1 = cljs.core.first.call(null,seq__52977__$1);
+var seq__52977__$2 = cljs.core.next.call(null,seq__52977__$1);
+var diff_val = first__52978__$1;
+var diff_rest = seq__52977__$2;
+var diff_coll = vec__52976;
 var result = cljs.core.transient$.call(null,cljs.core.PersistentVector.EMPTY);
 var index__$1 = index;
-var G__32290__$1 = G__32290;
-var G__32291__$1 = G__32291;
+var G__52971__$1 = G__52971;
+var G__52972__$1 = G__52972;
 var result__$1 = result;
 while(true){
 var index__$2 = index__$1;
-var vec__32294 = G__32290__$1;
-var old_val__$1 = cljs.core.nth.call(null,vec__32294,(0),null);
-var old_rest__$1 = cljs.core.nthnext.call(null,vec__32294,(1));
-var old_coll__$1 = vec__32294;
-var vec__32295 = G__32291__$1;
-var diff_index__$1 = cljs.core.nth.call(null,vec__32295,(0),null);
-var diff_val__$1 = cljs.core.nth.call(null,vec__32295,(1),null);
-var diff_rest__$1 = cljs.core.nthnext.call(null,vec__32295,(2));
-var diff_coll__$1 = vec__32295;
+var vec__52979 = G__52971__$1;
+var seq__52980 = cljs.core.seq.call(null,vec__52979);
+var first__52981 = cljs.core.first.call(null,seq__52980);
+var seq__52980__$1 = cljs.core.next.call(null,seq__52980);
+var old_val__$1 = first__52981;
+var old_rest__$1 = seq__52980__$1;
+var old_coll__$1 = vec__52979;
+var vec__52982 = G__52972__$1;
+var seq__52983 = cljs.core.seq.call(null,vec__52982);
+var first__52984 = cljs.core.first.call(null,seq__52983);
+var seq__52983__$1 = cljs.core.next.call(null,seq__52983);
+var diff_index__$1 = first__52984;
+var first__52984__$1 = cljs.core.first.call(null,seq__52983__$1);
+var seq__52983__$2 = cljs.core.next.call(null,seq__52983__$1);
+var diff_val__$1 = first__52984__$1;
+var diff_rest__$1 = seq__52983__$2;
+var diff_coll__$1 = vec__52982;
 var result__$2 = result__$1;
 if((cljs.core._EQ_.call(null,index__$2,max_index)) || (cljs.core.empty_QMARK_.call(null,old_coll__$1))){
-return cljs.core.persistent_BANG_.call(null,result__$2);
+return cljs.core.with_meta.call(null,cljs.core.persistent_BANG_.call(null,result__$2),cljs.core.meta.call(null,state));
 } else {
 if(cljs.core._EQ_.call(null,index__$2,diff_index__$1)){
-var G__32296 = (index__$2 + (1));
-var G__32297 = old_rest__$1;
-var G__32298 = diff_rest__$1;
-var G__32299 = cljs.core.conj_BANG_.call(null,result__$2,differ.patch.removals.call(null,old_val__$1,diff_val__$1));
-index__$1 = G__32296;
-G__32290__$1 = G__32297;
-G__32291__$1 = G__32298;
-result__$1 = G__32299;
+var G__52985 = (index__$2 + (1));
+var G__52986 = old_rest__$1;
+var G__52987 = diff_rest__$1;
+var G__52988 = cljs.core.conj_BANG_.call(null,result__$2,differ.patch.removals.call(null,old_val__$1,diff_val__$1));
+index__$1 = G__52985;
+G__52971__$1 = G__52986;
+G__52972__$1 = G__52987;
+result__$1 = G__52988;
 continue;
 } else {
-var G__32300 = (index__$2 + (1));
-var G__32301 = old_rest__$1;
-var G__32302 = diff_coll__$1;
-var G__32303 = cljs.core.conj_BANG_.call(null,result__$2,old_val__$1);
-index__$1 = G__32300;
-G__32290__$1 = G__32301;
-G__32291__$1 = G__32302;
-result__$1 = G__32303;
+var G__52989 = (index__$2 + (1));
+var G__52990 = old_rest__$1;
+var G__52991 = diff_coll__$1;
+var G__52992 = cljs.core.conj_BANG_.call(null,result__$2,old_val__$1);
+index__$1 = G__52989;
+G__52971__$1 = G__52990;
+G__52972__$1 = G__52991;
+result__$1 = G__52992;
 continue;
 
 }
 }
 break;
+}
 }
 });
 /**
@@ -235,11 +281,11 @@ if((cljs.core.sequential_QMARK_.call(null,state)) && (cljs.core.sequential_QMARK
 if(cljs.core.vector_QMARK_.call(null,diff)){
 return differ.patch.vec_removals.call(null,state,diff);
 } else {
-return cljs.core.into.call(null,cljs.core.List.EMPTY,cljs.core.reverse.call(null,differ.patch.vec_removals.call(null,state,diff)));
+return cljs.core.with_meta.call(null,cljs.core.into.call(null,cljs.core.List.EMPTY,cljs.core.reverse.call(null,differ.patch.vec_removals.call(null,state,diff))),cljs.core.meta.call(null,state));
 }
 } else {
 if((cljs.core.set_QMARK_.call(null,state)) && (cljs.core.set_QMARK_.call(null,diff))){
-return clojure.set.difference.call(null,state,diff);
+return cljs.core.with_meta.call(null,clojure.set.difference.call(null,state,diff),cljs.core.meta.call(null,state));
 } else {
 return state;
 

@@ -1,4 +1,4 @@
-// Compiled by ClojureScript 1.7.122 {}
+// Compiled by ClojureScript 1.9.946 {}
 goog.provide('differ.core');
 goog.require('cljs.core');
 goog.require('differ.diff');
@@ -13,10 +13,10 @@ return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMP
 /**
  * Applies a diff, as created by the diff function, to any datastructure.
  */
-differ.core.patch = (function differ$core$patch(state,p__32143){
-var vec__32145 = p__32143;
-var alterations = cljs.core.nth.call(null,vec__32145,(0),null);
-var removals = cljs.core.nth.call(null,vec__32145,(1),null);
+differ.core.patch = (function differ$core$patch(state,p__53089){
+var vec__53090 = p__53089;
+var alterations = cljs.core.nth.call(null,vec__53090,(0),null);
+var removals = cljs.core.nth.call(null,vec__53090,(1),null);
 return differ.patch.alterations.call(null,differ.patch.removals.call(null,state,removals),alterations);
 });
 

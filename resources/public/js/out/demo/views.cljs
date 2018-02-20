@@ -13,15 +13,15 @@
   (let [c (re-frame/subscribe [:count])]
     (fn []
       [:div
-       [:h3.uk-heading-bullet (str "Count: " @c)]
-       [:button.uk-button-default.uk-button {:on-click #(re-frame/dispatch [:increment-count 1])}
+       ;[:h3.uk-heading-bullet (str "Count: " @c)]
+       [:button.uk-button-default.uk-buttons {:on-click #(re-frame/dispatch [:increment-count 1])}
                               [:span {:data-uk-icon "plus"}]]
        [:button.uk-button-default.uk-button {:on-click #(re-frame/dispatch [:increment-count -1])}
                               [:span {:data-uk-icon "minus"}]]])))
 
 
 (defn main-panel []
-  (let [connected? (re-frame/subscribe [:ws/connected])]
+  (let [connected? (re-frame/subscribe [:data "ws/connected"])]
     (fn []
       (if @connected?
         [:div.uk-container

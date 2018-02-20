@@ -20,8 +20,7 @@
  * This file contains an implementation of a Map structure. It implements a lot
  * of the methods used in goog.structs so those functions work on hashes. This
  * is best suited for complex key types. For simple keys such as numbers and
- * strings, and where special names like __proto__ are not a concern, consider
- * using the lighter-weight utilities in goog.object.
+ * strings consider using the lighter-weight utilities in goog.object.
  */
 
 
@@ -40,6 +39,7 @@ goog.require('goog.object');
  *     will be used as key-value pairs.
  * @constructor
  * @template K, V
+ * @deprecated This type is misleading: use ES6 Map instead.
  */
 goog.structs.Map = function(opt_map, var_args) {
 
@@ -224,7 +224,7 @@ goog.structs.Map.prototype.remove = function(key) {
     this.count_--;
     this.version_++;
 
-    // clean up the keys array if the threshhold is hit
+    // clean up the keys array if the threshold is hit
     if (this.keys_.length > 2 * this.count_) {
       this.cleanupKeysArray_();
     }
@@ -303,7 +303,9 @@ goog.structs.Map.prototype.get = function(key, opt_val) {
 goog.structs.Map.prototype.set = function(key, value) {
   if (!(goog.structs.Map.hasKey_(this.map_, key))) {
     this.count_++;
-    this.keys_.push(key);
+    // TODO(johnlenz): This class lies, it claims to return an array of string
+    // keys, but instead returns the original object used.
+    this.keys_.push(/** @type {?} */ (key));
     // Only change the version if we add a new key.
     this.version_++;
   }

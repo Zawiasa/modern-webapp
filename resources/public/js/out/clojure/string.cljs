@@ -26,7 +26,12 @@
 
 (defn- replace-all
   [s re replacement]
-  (.replace s (js/RegExp. (.-source re) "g") replacement))
+  (let [r (js/RegExp. (.-source re)
+                      (cond-> "g"
+                        (.-ignoreCase re) (str "i")
+                        (.-multiline re) (str "m")
+                        (.-unicode re) (str "u")))]
+    (.replace s r replacement)))
 
 (defn- replace-with
   [f]
@@ -96,10 +101,7 @@
   "Converts first character of the string to upper-case, all other
   characters to lower-case."
   [s]
-  (if (< (count s) 2)
-    (upper-case s)
-    (str (upper-case (subs s 0 1))
-         (lower-case (subs s 1)))))
+  (gstring/capitalize s))
 
 ;; The JavaScript split function takes a limit argument but the return
 ;; value is not the same as the Java split function.
@@ -119,7 +121,7 @@
 
 (defn- discard-trailing-if-needed
   [limit v]
-  (if (== 0 limit)
+  (if (and (== 0 limit) (< 1 (count v)))
     (pop-last-while-empty v)
     v))
 
@@ -190,7 +192,7 @@
           (recur (dec index))
           (.substring s 0 index))))))
 
-(defn blank?
+(defn ^boolean blank?
   "True is s is nil, empty, or contains only whitespace."
   [s]
   (gstring/isEmptySafe s))
@@ -213,3 +215,46 @@
             (.append buffer (str replacement))
             (.append buffer ch))
           (recur (inc index)))))))
+
+(defn index-of
+  "Return index of value (string or char) in s, optionally searching
+  forward from from-index or nil if not found."
+  ([s value]
+   (let [result (.indexOf s value)]
+     (if (neg? result)
+       nil
+       result)))
+  ([s value from-index]
+   (let [result (.indexOf s value from-index)]
+     (if (neg? result)
+       nil
+       result))))
+
+(defn last-index-of
+  "Return last index of value (string or char) in s, optionally
+  searching backward from from-index or nil if not found."
+  ([s value]
+   (let [result (.lastIndexOf s value)]
+     (if (neg? result)
+       nil
+       result)))
+  ([s value from-index]
+   (let [result (.lastIndexOf s value from-index)]
+     (if (neg? result)
+       nil
+       result))))
+
+(defn ^boolean starts-with?
+  "True if s starts with substr."
+  [s substr]
+  (gstring/startsWith s substr))
+
+(defn ^boolean ends-with?
+  "True if s ends with substr."
+  [s substr]
+  (gstring/endsWith s substr))
+
+(defn ^boolean includes?
+  "True if s includes substr."
+  [s substr]
+  (gstring/contains s substr))

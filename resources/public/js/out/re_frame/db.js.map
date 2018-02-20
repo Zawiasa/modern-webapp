@@ -1,1 +1,1 @@
-{"version":3,"file":"\/Users\/paulcristian\/Desktop\/reframe-sente\/resources\/public\/js\/out\/re_frame\/db.js","sources":["db.cljs"],"lineCount":7,"mappings":";AAAA;;;AASA,AAAKA,qBAAO,4BAAA,5BAACC","names":["re-frame.db\/app-db","reagent.core\/atom"]}
+{"version":3,"file":"\/Users\/paulcristian\/Desktop\/modern-webapp\/resources\/public\/js\/out\/re_frame\/db.js","sources":["db.cljc"],"lineCount":7,"mappings":";AAAA;;;AASA,AAAKA,qBAAO,iCAAA,jCAACC","names":["re-frame.db\/app-db","re-frame.interop\/ratom"]}

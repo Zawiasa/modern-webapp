@@ -3,16 +3,17 @@
    [figwheel.client.utils :as utils :refer-macros [dev-assert]]
    [goog.Uri :as guri]
    [goog.string]
-   [goog.object :as gobj]   
+   [goog.object :as gobj]
    [goog.net.jsloader :as loader]
+   [goog.html.legacyconversions :as conv]
    [goog.string :as gstring]
    [clojure.string :as string]
-   
    [clojure.set :refer [difference]]
    [cljs.core.async :refer [put! chan <! map< close! timeout alts!] :as async])
   (:require-macros
    [cljs.core.async.macros :refer [go go-loop]])
-  (:import [goog]))
+  (:import [goog]
+           [goog.async Deferred]))
 
 (declare queued-file-reload)
 
@@ -27,6 +28,12 @@
 ;; document.body.addEventListener("figwheel.before-js-reload", function (e) { console.log(e.detail);} );
 (defn before-jsload-custom-event [files]
   (utils/dispatch-custom-event "figwheel.before-js-reload" files))
+
+;; you can listen to this event easily like so:
+;; document.body.addEventListener("figwheel.css-reload", function (e) {console.log(e.detail);} );
+(defn on-cssload-custom-event [files]
+  (utils/dispatch-custom-event "figwheel.css-reload" files))
+
 
 #_(defn all? [pred coll]
   (reduce #(and %1 %2) true (map pred coll)))
@@ -50,36 +57,20 @@
 
 (defn name->path [ns]
   (dev-assert (string? ns))
-  (aget js/goog.dependencies_.nameToPath ns))
+  (gobj/get js/goog.dependencies_.nameToPath ns))
 
 (defn provided? [ns]
-  (aget js/goog.dependencies_.written (name->path ns)))
-
-;; this is pretty simple, not sure how brittle it is 
-(defn fix-node-request-url [url]
-  (dev-assert (string? url))
-  (if (gstring/startsWith url "../")
-    (string/replace url "../" "")
-    (str "goog/" url)))
+  (gobj/get js/goog.dependencies_.written (name->path ns)))
 
 (defn immutable-ns? [name]
-  (or (#{"goog"
-         "cljs.core"
-         "an.existing.path"
-         "dup.base"
-         "far.out"
-         "ns"
-         "someprotopackage.TestPackageTypes"
-         "svgpan.SvgPan"
-         "testDep.bar"} name)
-      (some
-       (partial goog.string/startsWith name)
-       ["goog." "cljs." "clojure." "fake." "proto2."])))
+  (or (#{"goog" "cljs.core" "cljs.nodejs"} name)
+      (goog.string/startsWith "clojure." name)
+      (goog.string/startsWith "goog." name)))
 
 (defn get-requires [ns]
   (->> ns
     name->path
-    (aget js/goog.dependencies_.requires)
+    (gobj/get js/goog.dependencies_.requires)
     (gobj/getKeys)
     (filter #(not (immutable-ns? %)))
     set))
@@ -109,7 +100,7 @@
 (defn setup-ns->dependents!
   "This reverses the goog.dependencies_.requires for looking up ns-dependents."
   []
-  (let [requires (gobj/filter js/goog.dependencies_.requires 
+  (let [requires (gobj/filter js/goog.dependencies_.requires
                               (fn [v k o] (gstring/startsWith k "../")))]
     (gobj/forEach
      requires
@@ -123,6 +114,10 @@
 (defn ns->dependents [ns]
   (get-in @dependency-data [:dependents ns]))
 
+(defn in-upper-level? [topo-state current-depth dep]
+  (some (fn [[_ v]] (and v (v dep)))
+        (filter (fn [[k v]] (> k current-depth)) topo-state)))
+
 (defn build-topo-sort [get-deps]
   (let [get-deps (memoize get-deps)]
     (letfn [(topo-sort-helper* [x depth state]
@@ -134,7 +129,8 @@
               ([deps depth state]
                (swap! state update-in [depth] (fnil into #{}) deps)
                (doseq [dep deps]
-                 (topo-sort-helper* dep (inc depth) state))
+                 (when (and dep (not (in-upper-level? @state depth dep)))
+                   (topo-sort-helper* dep (inc depth) state)))
                (when (= depth 0)
                  (elim-dups* (reverse (vals @state))))))
             (elim-dups* [[x & xs]]
@@ -149,7 +145,8 @@
 
 (defn get-all-dependents [nss]
   (let [topo-sort' (build-topo-sort ns->dependents)]
-    (reverse (apply concat (topo-sort' (set nss))))))
+    (filter (comp not immutable-ns?)
+            (reverse (apply concat (topo-sort' (set nss)))))))
 
 #_(prn "dependents" (get-all-dependents [ "example.core" "figwheel.client.file_reloading" "cljs.core"]))
 
@@ -188,7 +185,6 @@
   ;; The biggest problem here is that clojure.browser.repl might have
   ;; patched this or might patch this afterward
   (when-not js/COMPILED
-    ;; 
     (set! (.-require_figwheel_backup_ js/goog) (or js/goog.require__ js/goog.require))
     ;; suppress useless Google Closure error about duplicate provides
     (set! (.-isProvided_ js/goog) (fn [name] false))
@@ -201,7 +197,7 @@
           (fn [& args]
             (apply addDependency args)
             (apply (.-addDependency_figwheel_backup_ js/goog) args)))
-    
+
     (goog/constructNamespace_ "cljs.user")
     ;; we must reuse Closure library dev time dependency management, under namespace
     ;; reload scenarios we simply delete entries from the correct
@@ -212,40 +208,84 @@
 (defn patch-goog-base []
   (defonce bootstrapped-cljs (do (bootstrap-goog-base) true)))
 
-(def reload-file*
-  (condp = (utils/host-env?)
-    :node
+(def gloader
+  (cond
+    (exists? loader/safeLoad)
+    #(loader/safeLoad (conv/trustedResourceUrlFromString (str %1)) %2)
+    (exists? loader/load) #(loader/load (str %1) %2)
+    :else (throw (ex-info "No remote script loading function found." {}))))
+
+(defn reload-file-in-html-env
+  [request-url callback]
+  (dev-assert (string? request-url) (not (nil? callback)))
+  (doto (gloader (add-cache-buster request-url) #js {:cleanupWhenDone true})
+    (.addCallback #(apply callback [true]))
+    (.addErrback  #(apply callback [false]))))
+
+(def ^:export write-script-tag-import reload-file-in-html-env)
+
+(defn ^:export worker-import-script [request-url callback]
+  (dev-assert (string? request-url) (not (nil? callback)))
+  (callback (try
+              (do (.importScripts js/self (add-cache-buster request-url))
+                  true)
+              (catch js/Error e
+                (utils/log :error (str  "Figwheel: Error loading file " request-url))
+                (utils/log :error (.-stack e))
+                false))))
+
+(defn ^:export create-node-script-import-fn []
+  (let [node-path-lib (js/require "path")
+        ;; just finding a file that is in the cache so we can
+        ;; figure out where we are
+        util-pattern (str (.-sep node-path-lib)
+                          (.join node-path-lib "goog" "bootstrap" "nodejs.js"))
+        util-path (gobj/findKey js/require.cache (fn [v k o] (gstring/endsWith k util-pattern)))
+        parts     (-> (string/split util-path #"[/\\]") pop pop)
+        root-path (string/join (.-sep node-path-lib) parts)]
     (fn [request-url callback]
       (dev-assert (string? request-url) (not (nil? callback)))
-      (let [root (string/join "/" (reverse (drop 2 (reverse (string/split js/__dirname "/")))))
-            path (str root "/" (fix-node-request-url request-url))]
-        (aset (.-cache js/require) path nil)
+      (let [cache-path (.resolve node-path-lib root-path request-url)]
+        (gobj/remove (.-cache js/require) cache-path)
         (callback (try
-                    (js/require path)
+                    (js/require cache-path)
                     (catch js/Error e
-                      (utils/log :error (str  "Figwheel: Error loading file " path))
+                      (utils/log :error (str  "Figwheel: Error loading file " cache-path))
                       (utils/log :error (.-stack e))
-                      false)))))
-    :html (fn [request-url callback]
-            (dev-assert (string? request-url) (not (nil? callback)))  
-            (let [deferred (loader/load (add-cache-buster request-url)
-                                        #js { :cleanupWhenDone true })]
-              (.addCallback deferred #(apply callback [true]))
-              (.addErrback deferred #(apply callback [false]))))
+                      false)))))))
+
+;; TODO
+#_(defn async-fetch-import-script [request-url callback]
+  (let [base-url (or goog.global.FIGWHEEL_RELOAD_BASE_URL "http://localhost:8081")]
+    (doto (js/fetch (str base-url "/" request-url))
+      (.then (fn [r] ))
+      )))
+
+(def reload-file*
+  (condp = (utils/host-env?)
+    :node (create-node-script-import-fn)
+    :html write-script-tag-import
+    ;; TODO react native reloading not supported internally yet
+    ;:react-native
+    #_(if (utils/worker-env?)
+      worker-import-script
+      async-fetch-import-script)
+    :worker worker-import-script
     (fn [a b] (throw "Reload not defined for this platform"))))
 
 (defn reload-file [{:keys [request-url] :as file-msg} callback]
   (dev-assert (string? request-url) (not (nil? callback)))
   (utils/debug-prn (str "FigWheel: Attempting to load " request-url))
-  (reload-file* request-url
-                (fn [success?]
-                  (if success?
-                    (do
-                      (utils/debug-prn (str "FigWheel: Successfully loaded " request-url))
-                      (apply callback [(assoc file-msg :loaded-file true)]))
-                    (do
-                      (utils/log :error (str  "Figwheel: Error loading file " request-url))
-                      (apply callback [file-msg]))))))
+  ((or (gobj/get goog.global "FIGWHEEL_IMPORT_SCRIPT") reload-file*)
+   request-url
+   (fn [success?]
+     (if success?
+       (do
+         (utils/debug-prn (str "FigWheel: Successfully loaded " request-url))
+         (apply callback [(assoc file-msg :loaded-file true)]))
+       (do
+         (utils/log :error (str  "Figwheel: Error loading file " request-url))
+         (apply callback [file-msg]))))))
 
 ;; for goog.require consumption
 (defonce reload-chan (chan))
@@ -265,14 +305,23 @@
 
 (defonce reloader-loop
   (go-loop []
-    (when-let [url (<! reload-chan)]
-      (let [file-msg (<! (blocking-load url))]
-        (if-let [callback (get @on-load-callbacks url)]
-          (callback file-msg)
-          (swap! dependencies-loaded conj file-msg))
-        (recur)))))
+    (when-let [[url opt-source-text] (<! reload-chan)]
+      (cond
+        opt-source-text
+        (do
+          (js/console.log "Evaling!" opt-source-text)
+          (js/eval opt-source-text))
+        url
+        (let [file-msg (<! (blocking-load url))]
+          (js/console.log "Loading!" url)
+          (if-let [callback (get @on-load-callbacks url)]
+            (callback file-msg)
+            (swap! dependencies-loaded conj file-msg))))
+      (recur))))
 
-(defn queued-file-reload [url] (put! reload-chan url))
+(defn queued-file-reload
+  ([url] (queued-file-reload url nil))
+  ([url opt-source-text] (put! reload-chan [url opt-source-text])))
 
 (defn require-with-callback [{:keys [namespace] :as file-msg} callback]
   (let [request-url (resolve-ns namespace)]
@@ -283,11 +332,15 @@
     ;; we are forcing reload here
     (figwheel-require (name namespace) true)))
 
+(defn figwheel-no-load? [{:keys [namespace] :as file-msg}]
+  (let [meta-pragmas (get @figwheel-meta-pragmas (name namespace))]
+    (:figwheel-no-load meta-pragmas)))
+
 (defn reload-file? [{:keys [namespace] :as file-msg}]
   (dev-assert (namespace-file-map? file-msg))
   (let [meta-pragmas (get @figwheel-meta-pragmas (name namespace))]
     (and
-     (not (:figwheel-no-load meta-pragmas))
+     (not (figwheel-no-load? file-msg))
      (or
       (:figwheel-always meta-pragmas)
       (:figwheel-load meta-pragmas)
@@ -335,7 +388,9 @@
 
 (defn expand-files [files]
   (let [deps (get-all-dependents (map :namespace files))]
-    (filter (comp not #{"figwheel.connect"} :namespace)
+    (filter (comp not
+                  (partial re-matches #"figwheel\.connect.*")
+                  :namespace)
             (map
              (fn [n]
                (if-let [file-msg (first (filter #(= (:namespace %) n) files))]
@@ -344,8 +399,10 @@
              deps))))
 
 (defn sort-files [files]
-  (let [keep-files (set (keep :namespace files))]
-    (filter (comp keep-files :namespace) (expand-files files))))
+  (if (<= (count files) 1) ;; no need to sort if only one
+    files
+    (let [keep-files (set (keep :namespace files))]
+      (filter (comp keep-files :namespace) (expand-files files)))))
 
 (defn get-figwheel-always []
   (map (fn [[k v]] {:namespace k :type :namespace})
@@ -369,7 +426,8 @@
           (eval-body eval-body-file opts))))
     (reset! dependencies-loaded (list))
     (let [all-files (filter #(and (:namespace %)
-                                  (not (:eval-body %)))
+                                  (not (:eval-body %))
+                                  (not (figwheel-no-load? %)))
                             files)
           ;; add in figwheel always
           all-files (concat all-files (get-figwheel-always))
@@ -386,7 +444,7 @@
         (utils/log :debug "Figwheel: loaded these dependencies")
         (utils/log (pr-str (map (fn [{:keys [request-url]}]
                                   (string/replace request-url goog/basePath ""))
-                                (reverse dependencies-that-loaded)))))      
+                                (reverse dependencies-that-loaded)))))
       (when (not-empty res)
         (utils/log :debug "Figwheel: loaded these files")
         (utils/log (pr-str (map (fn [{:keys [namespace file]}]
@@ -396,7 +454,7 @@
         (js/setTimeout #(do
                           (on-jsload-custom-event res)
                           (apply on-jsload [res])) 10))
-      
+
       (when (not-empty files-not-loaded)
         (utils/log :debug "Figwheel: NOT loading these files ")
         (let [{:keys [figwheel-no-load not-required]}
@@ -421,10 +479,10 @@
          (.getElementsByTagName js/document "link")))
 
 (defn truncate-url [url]
-  (-> (first (string/split url #"\?")) 
+  (-> (first (string/split url #"\?"))
       (string/replace-first (str (.-protocol js/location) "//") "")
       (string/replace-first ".*://" "")
-      (string/replace-first #"^//" "")         
+      (string/replace-first #"^//" "")
       (string/replace-first #"[^\/]*" "")))
 
 (defn matches-file?
@@ -466,26 +524,39 @@
     (set! (.-href link)     (add-cache-buster url))
     link))
 
-(defn add-link-to-doc
-  ([new-link]
-     (.appendChild (aget (.getElementsByTagName js/document "head") 0)
-                   new-link))
-  ([orig-link klone]
-     (let [parent (.-parentNode orig-link)]
-       (if (= orig-link (.-lastChild parent))
-         (.appendChild parent klone)
-         (.insertBefore parent klone (.-nextSibling orig-link)))
-       (js/setTimeout #(.removeChild parent orig-link) 300))))
-
-(defn distictify [key seqq]
+(defn distinctify [key seqq]
   (vals (reduce #(assoc %1 (get %2 key) %2) {} seqq)))
 
-(defn reload-css-file [{:keys [file] :as f-data}]
-  (when-let [link (get-correct-link f-data)]
-    (add-link-to-doc link (clone-link link (.-href link)))
-    #_(add-link-to-doc (create-link file))))
+(defn add-link-to-document [orig-link klone finished-fn]
+  (let [parent (.-parentNode orig-link)]
+    (if (= orig-link (.-lastChild parent))
+      (.appendChild parent klone)
+      (.insertBefore parent klone (.-nextSibling orig-link)))
+    ;; prevent css removal flash
+    (js/setTimeout #(do
+                      (.removeChild parent orig-link)
+                      (finished-fn))
+                   300)))
 
-(defn reload-css-files [{:keys [on-cssload] :as opts} files-msg]
+(defonce reload-css-deferred-chain (atom (.succeed Deferred)))
+
+(defn reload-css-file [f-data fin]
+  (if-let [link (get-correct-link f-data)]
+    (add-link-to-document link (clone-link link (.-href link))
+                          #(fin (assoc f-data :loaded true)))
+    (fin f-data)))
+
+(defn reload-css-files* [deferred f-datas on-cssload]
+  (-> deferred
+      (utils/mapConcatD reload-css-file f-datas)
+      (utils/liftContD (fn [f-datas' fin]
+                         (let [loaded-f-datas (filter :loaded f-datas')]
+                             (on-cssload-custom-event loaded-f-datas)
+                             (when (fn? on-cssload)
+                               (on-cssload loaded-f-datas)))
+                         (fin)))))
+
+(defn reload-css-files [{:keys [on-cssload]} {:keys [files] :as files-msg}]
   (when (utils/html-env?)
-    (doseq [f (distictify :file (:files files-msg))] (reload-css-file f))
-    (js/setTimeout #(on-cssload (:files files-msg)) 100)))
+    (when-let [f-datas (not-empty (distinctify :file files))]
+      (swap! reload-css-deferred-chain reload-css-files* f-datas on-cssload))))
