@@ -13,10 +13,10 @@ return new cljs.core.PersistentVector(null, 2, 5, cljs.core.PersistentVector.EMP
 /**
  * Applies a diff, as created by the diff function, to any datastructure.
  */
-differ.core.patch = (function differ$core$patch(state,p__53089){
-var vec__53090 = p__53089;
-var alterations = cljs.core.nth.call(null,vec__53090,(0),null);
-var removals = cljs.core.nth.call(null,vec__53090,(1),null);
+differ.core.patch = (function differ$core$patch(state,p__53092){
+var vec__53093 = p__53092;
+var alterations = cljs.core.nth.call(null,vec__53093,(0),null);
+var removals = cljs.core.nth.call(null,vec__53093,(1),null);
 return differ.patch.alterations.call(null,differ.patch.removals.call(null,state,removals),alterations);
 });
 
