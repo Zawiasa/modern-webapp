@@ -846,3 +846,224 @@ notifying browser that file changed:  resources/public/js/out/demo/views.js
 [0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
 [32mSuccessfully compiled "resources/public/js/app.js" in 0.628 seconds.[0m
 notifying browser that file changed:  resources/public/js/out/demo/handlers.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 3.633 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/goog/deps.js
+notifying browser that file changed:  resources/public/js/out/cljs_deps.js
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.982 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.702 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:26  column:1  ----[0m
+
+  [1mUse of undeclared Var demo.ws/-event-msg-handler[0m
+
+  [36m22[0m  [36m(defmethod event-msg-handler :default[0m
+  [36m23[0m  [36m  [{:as ev-msg :keys [event]}][0m
+  [36m24[0m  [36m  (debugf "Unandled event: %s" event))[0m
+  [36m25[0m  [36m[0m
+  [33m26[0m  [1m(defmethod -event-msg-handler :chsk/state[0m
+  [0m  [0m  [33m^--- Use of undeclared Var demo.ws/-event-msg-handler[0m
+  [36m27[0m  [36m  [{:as ev-msg :keys [?data open?]}][0m
+  [36m28[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)][0m
+  [36m29[0m  [36m    (if (:first-open? new-state-map)[0m
+  [36m30[0m  [36m      ;(notification-sente "Channel socket successfully established!: %s" new-state-map)[0m
+  [36m31[0m  [36m       (notification-sente "Connected to LvLUp :)"              new-state-map))[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:28  column:40  ----[0m
+
+  [1mUse of undeclared Var demo.ws/have[0m
+
+  [36m24[0m  [36m  (debugf "Unandled event: %s" event))[0m
+  [36m25[0m  [36m[0m
+  [36m26[0m  [36m(defmethod -event-msg-handler :chsk/state[0m
+  [36m27[0m  [36m  [{:as ev-msg :keys [?data open?]}][0m
+  [33m28[0m  [1m  (let [[old-state-map new-state-map] (have vector? ?data)][0m
+  [0m  [0m  [33m                                       ^--- Use of undeclared Var demo.ws/have[0m
+  [36m29[0m  [36m    (if (:first-open? new-state-map)[0m
+  [36m30[0m  [36m      ;(notification-sente "Channel socket successfully established!: %s" new-state-map)[0m
+  [36m31[0m  [36m       (notification-sente "Connected to LvLUp :)"              new-state-map))[0m
+  [36m32[0m  [36m    (dispatch [:set-connection-state (:open? new-state-map)])))[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:31  column:9  ----[0m
+
+  [1mUse of undeclared Var demo.ws/notification-sente[0m
+
+  [36m27[0m  [36m  [{:as ev-msg :keys [?data open?]}][0m
+  [36m28[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)][0m
+  [36m29[0m  [36m    (if (:first-open? new-state-map)[0m
+  [36m30[0m  [36m      ;(notification-sente "Channel socket successfully established!: %s" new-state-map)[0m
+  [33m31[0m  [1m       (notification-sente "Connected to LvLUp :)"              new-state-map))[0m
+  [0m  [0m  [33m        ^--- Use of undeclared Var demo.ws/notification-sente[0m
+  [36m32[0m  [36m    (dispatch [:set-connection-state (:open? new-state-map)])))[0m
+  [36m33[0m  [36m[0m
+  [36m34[0m  [36m(defmethod event-msg-handler :chsk/state[0m
+  [36m35[0m  [36m  [{:as ev-msg :keys [?data open?]}][0m
+  [36m36[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)])[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:32  column:6  ----[0m
+
+  [1mUse of undeclared Var demo.ws/dispatch[0m
+
+  [36m28[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)][0m
+  [36m29[0m  [36m    (if (:first-open? new-state-map)[0m
+  [36m30[0m  [36m      ;(notification-sente "Channel socket successfully established!: %s" new-state-map)[0m
+  [36m31[0m  [36m       (notification-sente "Connected to LvLUp :)"              new-state-map))[0m
+  [33m32[0m  [1m    (dispatch [:set-connection-state (:open? new-state-map)])))[0m
+  [0m  [0m  [33m     ^--- Use of undeclared Var demo.ws/dispatch[0m
+  [36m33[0m  [36m[0m
+  [36m34[0m  [36m(defmethod event-msg-handler :chsk/state[0m
+  [36m35[0m  [36m  [{:as ev-msg :keys [?data open?]}][0m
+  [36m36[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)])[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:36  column:40  ----[0m
+
+  [1mUse of undeclared Var demo.ws/have[0m
+
+  [36m32[0m  [36m    (dispatch [:set-connection-state (:open? new-state-map)])))[0m
+  [36m33[0m  [36m[0m
+  [36m34[0m  [36m(defmethod event-msg-handler :chsk/state[0m
+  [36m35[0m  [36m  [{:as ev-msg :keys [?data open?]}][0m
+  [33m36[0m  [1m  (let [[old-state-map new-state-map] (have vector? ?data)])[0m
+  [0m  [0m  [33m                                       ^--- Use of undeclared Var demo.ws/have[0m
+  [36m37[0m  [36m[0m
+  [36m38[0m  [36m  (debugf "%s" ?data)[0m
+  [36m39[0m  [36m  (.notification js/UIkit (str "What's the prolem" (:open? ?data)))[0m
+  [36m40[0m  [36m  (re-frame/dispatch [:ws/connected (:open? new-state-map)]))[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:40  column:45  ----[0m
+
+  [1mUse of undeclared Var demo.ws/new-state-map[0m
+
+  [36m36[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)])[0m
+  [36m37[0m  [36m[0m
+  [36m38[0m  [36m  (debugf "%s" ?data)[0m
+  [36m39[0m  [36m  (.notification js/UIkit (str "What's the prolem" (:open? ?data)))[0m
+  [33m40[0m  [1m  (re-frame/dispatch [:ws/connected (:open? new-state-map)]))[0m
+  [0m  [0m  [33m                                            ^--- Use of undeclared Var demo.ws/new-state-map[0m
+  [36m41[0m  [36m[0m
+  [36m42[0m  [36m[0m
+  [36m43[0m  [36m(defmethod event-msg-handler :chsk/handshake[0m
+  [36m44[0m  [36m  [{:as ev-msg :keys [?data]}])[0m
+  [36m45[0m  [36m  ; ???[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 1.158 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:30  column:40  ----[0m
+
+  [1mUse of undeclared Var demo.ws/have[0m
+
+  [36m28[0m  [36m(defmethod event-msg-handler :chsk/state[0m
+  [36m29[0m  [36m  [{:as ev-msg :keys [?data open?]}][0m
+  [33m30[0m  [1m  (let [[old-state-map new-state-map] (have vector? ?data)])[0m
+  [0m  [0m  [33m                                       ^--- Use of undeclared Var demo.ws/have[0m
+  [36m31[0m  [36m[0m
+  [36m32[0m  [36m  (debugf "%s" ?data)[0m
+  [36m33[0m  [36m  (.notification js/UIkit (str "What's the prolem" (:open? ?data)))[0m
+  [36m34[0m  [36m  (re-frame/dispatch [:ws/connected (:open? new-state-map)]))[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:34  column:45  ----[0m
+
+  [1mUse of undeclared Var demo.ws/new-state-map[0m
+
+  [36m30[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)])[0m
+  [36m31[0m  [36m[0m
+  [36m32[0m  [36m  (debugf "%s" ?data)[0m
+  [36m33[0m  [36m  (.notification js/UIkit (str "What's the prolem" (:open? ?data)))[0m
+  [33m34[0m  [1m  (re-frame/dispatch [:ws/connected (:open? new-state-map)]))[0m
+  [0m  [0m  [33m                                            ^--- Use of undeclared Var demo.ws/new-state-map[0m
+  [36m35[0m  [36m[0m
+  [36m36[0m  [36m[0m
+  [36m37[0m  [36m(defmethod event-msg-handler :chsk/handshake[0m
+  [36m38[0m  [36m  [{:as ev-msg :keys [?data]}])[0m
+  [36m39[0m  [36m  ; ???[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.753 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[36m----  Compiler Warning on   src/cljs/demo/ws.cljs   line:35  column:45  ----[0m
+
+  [1mUse of undeclared Var demo.ws/new-state-map[0m
+
+  [36m31[0m  [36m  (let [[old-state-map new-state-map] (have vector? ?data)])[0m
+  [36m32[0m  [36m[0m
+  [36m33[0m  [36m  (debugf "%s" ?data)[0m
+  [36m34[0m  [36m  (.notification js/UIkit (str "What's the prolem" (:open? ?data)))[0m
+  [33m35[0m  [1m  (re-frame/dispatch [:ws/connected (:open? new-state-map)]))[0m
+  [0m  [0m  [33m                                            ^--- Use of undeclared Var demo.ws/new-state-map[0m
+  [36m36[0m  [36m[0m
+  [36m37[0m  [36m[0m
+  [36m38[0m  [36m(defmethod event-msg-handler :chsk/handshake[0m
+  [36m39[0m  [36m  [{:as ev-msg :keys [?data]}])[0m
+  [36m40[0m  [36m  ; ???[0m
+
+[36m----  Compiler Warning : Please see src/cljs/demo/ws.cljs  ----[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.989 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.615 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.596 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.707 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.797 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.718 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/views.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.574 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/views.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.821 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.692 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/subs.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.623 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/handlers.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.78 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.645 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.724 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.686 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/handlers.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.731 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/handlers.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.806 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.666 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/ws.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.631 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/views.js
+[0mCompiling "resources/public/js/app.js" from ("src/cljs" "src/cljc" "env/dev/cljs")...[0m
+[32mSuccessfully compiled "resources/public/js/app.js" in 0.593 seconds.[0m
+notifying browser that file changed:  resources/public/js/out/demo/views.js

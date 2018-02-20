@@ -44,4 +44,5 @@
 (re-frame/reg-event-db
   :state/diff
   (fn [db [_ diff]]
+    (.log js/console "Itt a kutya elásva")
     (assoc db :shared (differ/patch (:shared db) diff))))

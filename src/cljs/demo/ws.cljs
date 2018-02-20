@@ -3,6 +3,7 @@
    [cljs.core.async.macros :as asyncm :refer (go go-loop)])
   (:require [cljs.core.async :as async :refer (<! >! put! chan)]
             [taoensso.encore :as encore :refer (debugf)]
+            [taoensso.encore :as encore :refer-macros (have have?)]
             [taoensso.sente :as sente :refer (cb-success?)]
             [re-frame.core :as re-frame]))
 
@@ -23,10 +24,15 @@
   [{:as ev-msg :keys [event]}]
   (debugf "Unandled event: %s" event))
 
+
+
 (defmethod event-msg-handler :chsk/state
-  [{:as ev-msg :keys [?data]}]
-  (debugf "%s" ?data)
-  (re-frame/dispatch [:ws/connected (:open? ?data)]))
+  [{:as ev-msg :keys [?data open?]}]
+  (let [[old-state-map new-state-map] (have vector? ?data)]
+
+    (debugf "%s" ?data)
+    ;(.notification js/UIkit (str "What's the problem" (:open? ?data)))
+    (re-frame/dispatch [:ws/connected (:open? new-state-map)])))
 
 
 (defmethod event-msg-handler :chsk/handshake
@@ -37,6 +43,9 @@
 
 (defmethod event-msg-handler :chsk/recv
   [{:as ev-msg :keys [?data]}]
+  (debugf "%s" ?data)
+  (.log js/console "hello" (str ?data))
+;  (.notification js/UIkit (str "What's the problem" (:open? ?data)))
   (re-frame/dispatch ?data))
 
 
