@@ -10,7 +10,7 @@
             [hiccup.page :refer [include-js include-css]]
             [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [bidi.ring :refer [make-handler]]
+            [bidi.ring :refer [make-handler ->ResourcesMaybe]]
             [ring.util.response :as res]
             [environ.core :refer [env]]))
 
@@ -36,11 +36,10 @@
   (res/response "Homepage"))
 
 (def routes
-  ["/"
-   {"" (fn [req] {:status 200 :body home-page :headers {"Content-Type" "text/html"}})
-    "hmm" (fn [req] {:status 200 :body "idsada"})
-    "chsk" {:get (fn [req] (ws/ring-ajax-get-or-ws-handshake req))
-            :post (fn [req] (ws/ring-ajax-post req))}}])
+  [""
+   [["/" (fn [req] {:status 200 :body home-page :headers {"Content-Type" "text/html"}})]
+    ["/chsk" {:get (fn [req] (ws/ring-ajax-get-or-ws-handshake req))
+              :post (fn [req] (ws/ring-ajax-post req))}]]])
 
 (def app
   (let [handler (make-handler routes)]
