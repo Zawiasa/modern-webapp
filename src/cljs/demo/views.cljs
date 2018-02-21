@@ -1,5 +1,5 @@
 (ns demo.views
-  (:require [re-frame.core :as re-frame]))
+  (:require [re-frame.core :as re-frame :refer [subscribe dispatch]]))
             ;[taoensso.encore :as encore :refer (debugf)]))
 
 
@@ -7,13 +7,48 @@
   (fn []
     [:div "You are not connected"]))
 
+(defn language-menu-item [[the-key item]]
+  (let [title (:item item)]
+    [:li.uk-grid-medium.uk-flex-middle.uk-margin-small
+     {:data-uk-grid true}
+
+     [:div.uk-width-auto
+      [:img.uk-comment-avatar
+       {:alt ""
+        :width "40"
+        :src (str "/img/icons/" (name the-key) ".svg")}]]
+     [:div.uk-width-expand
+      [:a.uk-link-reset {:href "#"
+                         :on-click #(dispatch [:assoc-state :active-language the-key])}
+       title]]]))
+
+(defn language-menu []
+  (let [languages (subscribe [:data "languages"])
+        active-language (subscribe [:data "active-language"])
+        get-title (fn [] (str (:title (get @languages @active-language))))]
+    (fn []
+      [:li.uk-grid-medium.uk-flex-middle.uk-margin-small
+       {:data-uk-grid true}
+
+       [:div.uk-width-auto
+        [:img.uk-comment-avatar
+         {:alt ""
+          :width "40"
+          :src (str "/img/icons/" (name @active-language) ".svg")}]
+        [:a.uk-link-reset.uk-padding-small {:href "#"} (get-title)]]
+
+       [:div.uk-navbar-dropdown.uk-padding-small
+        [:ul.uk-nav.uk-navbar-dropdown-nav
+         (for [item @languages]
+           ^{:key (first item)} [language-menu-item item])]]])))
+
 (defn navbar []
   [:nav.uk-navbar-container
    {:data-uk-navbar true}
    [:div.uk-navbar-left
     [:ul.uk-navbar-nav
      [:li
-      [:a {:href "#"} "Modern-webApp"]
+      [:a {:href "#"} [:h3.uk-heading-bullet "Modern-WebApp"]]
       [:div.uk-navbar-dropdown.uk-navbar-dropdown-width-2
        [:div.uk-navbar-dropdown-grid.uk-child-width-1-2
         {:data-uk-grid true}
@@ -34,10 +69,13 @@
           [:li [:a {:href "#"} "Item"]]
           [:li [:a {:href "#"} "Item"]]
           [:li.uk-nav-divider]
-          [:li [:a {:href "#"} "Item"]]]]]]]]]])
+          [:li [:a {:href "#"} "Item"]]]]]]]]]
+   [:div.uk-navbar-right
+    [:ul.uk-navbar-nav
+     [language-menu]]]])
 
 (defn counter []
-  (let [c (re-frame/subscribe [:data "shared"])]
+  (let [c (subscribe [:data "shared"])]
     (fn []
       [:div
        [:h3.uk-heading-bullet (str "Count: " (:count @c))]
