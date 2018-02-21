@@ -19,8 +19,8 @@
         {:data-uk-grid true}
         [:div
          [:ul.uk-nav.uk-navbar-dropdown-nav
-          [:li.uk-active [:a {:href "#"} "Active"]]
-          [:li [:a {:href "#"} "Item"]]
+          [:li.uk-active [:a {:href "#"} "Blogs"]]
+          [:li [:a {:href "#"} "Featured"]]
           [:li.uk-nav-header "Header"]
           [:li [:a {:href "#"} "Item"]]
           [:li [:a {:href "#"} "Item"]]
