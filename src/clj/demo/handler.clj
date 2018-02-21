@@ -3,18 +3,19 @@
             ;[demo.db :as db]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.route :refer [not-found resources]]
-            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [ring.middleware.defaults :refer [api-defaults site-defaults wrap-defaults]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
             [hiccup.core :refer [html]]
             [hiccup.page :refer [include-js include-css]]
             [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [bidi.ring :refer (make-handler)]
+            [bidi.ring :refer [make-handler]]
             [ring.util.response :as res]
             [environ.core :refer [env]]))
 
 (def home-page
+
   (html
    [:html
     [:head
@@ -32,30 +33,23 @@
 
 (defn index-handler
   [request]
-  (res/response home-page))
+  (res/response "Homepage"))
 
-(defn article-handler
-  [{:keys [route-params]}]
-  (res/response (str "You are viewing article: " (:id route-params))))
-  ;(GET  "/chsk" req (ws/ring-ajax-get-or-ws-handshake req)
-  ;           (POST "/chsk" req (ws/ring-ajax-post req))))
 (def routes
   ["/"
-   {"" (fn [req] {:status 200 :body home-page})
-    "hmm" (fn [req] {:status 200 :body "hmm"})
-    "chsk" {:get (fn [req] (res/response (ws/ring-ajax-get-or-ws-handshake req)))
-            :post (fn [req] (res/response (ws/ring-ajax-post req)))}}])
-    ;"chsk" ws/ring-ajax-get-or-ws-handshake}])
+   {"" (fn [req] {:status 200 :body home-page :headers {"Content-Type" "text/html"}})
+    "hmm" (fn [req] {:status 200 :body "idsada"})
+    "chsk" {:get (fn [req] (ws/ring-ajax-get-or-ws-handshake req))
+            :post (fn [req] (ws/ring-ajax-post req))}}])
 
 (def app
   (let [handler (make-handler routes)]
     (if (env :dev)
       (-> handler
+          (wrap-defaults site-defaults)
           wrap-exceptions
-          wrap-params
+          wrap-keyword-params
           wrap-keyword-params
           wrap-reload)
-      (->
-       wrap-params
-       wrap-keyword-params
-       handler))))
+
+      handler)))
