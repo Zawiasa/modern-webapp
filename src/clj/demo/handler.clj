@@ -1,6 +1,6 @@
 (ns demo.handler
   (:require [demo.ws :as ws]
-            [demo.db :as db]
+            ;[demo.db :as db]
             [compojure.core :refer [GET POST defroutes]]
             [compojure.route :refer [not-found resources]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -26,14 +26,12 @@
     (include-js "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/js/uikit-icons.min.js")
     (include-js "js/app.js")]))
 
-
 (defroutes routes
-  (GET  "/" [] home-page)
-  (GET  "/chsk" req (ws/ring-ajax-get-or-ws-handshake req))
-  (POST "/chsk" req (ws/ring-ajax-post req))
-
-  (resources "/")
-  (not-found "Not Found"))
+           (GET  "/" [] home-page)
+           (GET  "/chsk" req (ws/ring-ajax-get-or-ws-handshake req))
+           (POST "/chsk" req (ws/ring-ajax-post req))
+           (resources "/")
+           (not-found "Not Found"))
 
 (def app
   (let [handler (wrap-defaults #'routes site-defaults)]
