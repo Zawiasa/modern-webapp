@@ -53,7 +53,7 @@
        [:div.uk-navbar-dropdown-grid.uk-child-width-1-2
         {:data-uk-grid true}
         [:div
-         [:ul.uk-nav.uk-navbar-dropdown-nav
+         [:ul.uk-nav.uk-navbar-dropdown-nav.uk-margin-small
           [:li.uk-active [:a {:href "#"} "Blogs"]]
           [:li [:a {:href "#"} "Featured"]]
           [:li.uk-nav-header "Header"]
