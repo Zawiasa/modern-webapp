@@ -38,14 +38,14 @@
         get-title (fn [] (str (:title (get @languages @active-language))))]
     (fn []
       [:li.uk-grid-medium.uk-flex-middle.uk-margin-small
-       {:data-uk-grid true}
+       {:data-uk-grid true :style {:height "20px"}}
 
        [:div.uk-width-auto
-        [:img.uk-comment-avatar
+        [:a.uk-link-reset.uk-padding-small.uk-text-middle {:href "#"} (get-title)]
+        [:img.uk-margin-small-top
          {:alt ""
           :width "40"
-          :src (str "/img/icons/" (name @active-language) ".svg")}]
-        [:a.uk-link-reset.uk-padding-small {:href "#"} (get-title)]]
+          :src (str "/img/icons/" (name @active-language) ".svg")}]]
 
        [:div.uk-navbar-dropdown.uk-padding-small
         [:ul.uk-nav.uk-navbar-dropdown-nav
@@ -58,7 +58,7 @@
    [:div.uk-navbar-left
     [:ul.uk-navbar-nav
      [:li
-      [:a {:href "#"} [:h3.uk-heading-bullet "Modern-WebApp"]]
+      [:a {:href "#"} [:h3.uk-heading-bullet.uk-padding-remove.uk-margin-remove "Modern-WebApp"]]
       [:div.uk-navbar-dropdown.uk-navbar-dropdown-width-2
        [:div.uk-navbar-dropdown-grid.uk-child-width-1-2
         {:data-uk-grid true}
