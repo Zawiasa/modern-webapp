@@ -7,6 +7,16 @@
   (fn []
     [:div "You are not connected"]))
 
+(defn footer []
+  [:footer
+   [:div.uk-width-1-1.uk-card.uk-card-default.uk-position-bottom
+    [:h2.uk-heading-bullet.uk-padding-small.uk-padding-remove-vertical.uk-margin-small-top.uk-margin-small
+     "Footer"]
+    [:div.uk-position-right
+     [:a.uk-padding-small {:data-uk-icon "icon: facebook; ratio: 1.7" :href "https://facebook.com"}]
+     [:a.uk-padding-small {:data-uk-icon "icon: linkedin; ratio: 1.7" :href "https://linkedin.com"}]
+     [:a.uk-padding-small {:data-uk-icon "icon: twitter; ratio: 1.7"  :href "https://twitter.com"}]]]])
+
 (defn language-menu-item [[the-key item]]
   (let [title (:item item)]
     [:li.uk-grid-medium.uk-flex-middle.uk-margin-small
@@ -96,7 +106,8 @@
 (defn modern-app []
   [:div
    [navbar]
-   [demo-component]])
+   [demo-component]
+   [footer]])
 
 (defn main-panel []
   (let [connected? (re-frame/subscribe [:data "ws/connected"])]

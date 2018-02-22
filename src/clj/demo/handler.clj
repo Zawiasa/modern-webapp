@@ -15,7 +15,6 @@
             [environ.core :refer [env]]))
 
 (def home-page
-
   (html
    [:html
     [:head
