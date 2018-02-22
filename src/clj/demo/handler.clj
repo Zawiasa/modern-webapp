@@ -1,8 +1,6 @@
 (ns demo.handler
   (:require [demo.ws :as ws]
             ;[demo.db :as db]
-            [compojure.core :refer [GET POST defroutes]]
-            [compojure.route :refer [not-found resources]]
             [ring.middleware.defaults :refer [api-defaults site-defaults wrap-defaults]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
@@ -36,9 +34,9 @@
 
 (def routes
   [""
-   [["/" (fn [req] {:status 200 :body home-page :headers {"Content-Type" "text/html"}})]
-    ["/chsk" {:get (fn [req] (ws/ring-ajax-get-or-ws-handshake req))
-              :post (fn [req] (ws/ring-ajax-post req))}]]])
+   [["/chsk" {:get (fn [req] (ws/ring-ajax-get-or-ws-handshake req))
+              :post (fn [req] (ws/ring-ajax-post req))}]
+    [true (fn [req] {:status 200 :body home-page :headers {"Content-Type" "text/html"}})]]])
 
 (def app
   (let [handler (make-handler routes)]
@@ -47,7 +45,7 @@
           (wrap-defaults site-defaults)
           wrap-exceptions
           wrap-keyword-params
-          wrap-keyword-params
+          wrap-params
           wrap-reload)
 
       handler)))
