@@ -19,7 +19,7 @@
                            [bidi "2.1.3"]
                            [environ "1.1.0"]
                            [org.clojure/clojurescript "1.9.946"]
-                           [secretary "1.2.3"]
+                           [venantius/accountant "0.2.3"]
                            [com.taoensso/sente "1.12.0"]
 
                            [org.clojure/java.jdbc "0.7.3"]
