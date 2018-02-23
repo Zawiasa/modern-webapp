@@ -6,6 +6,7 @@
   (let [c (subscribe [:data "shared"])]
     (fn []
       [:div
+
        [:h3.uk-heading-bullet (str "Count: " (:count @c))]
        [:button.uk-button-default.uk-button {:on-click #(re-frame/dispatch [:increment-count 1])}
         [:span {:data-uk-icon "plus"}]]

@@ -17,19 +17,16 @@
   (def connected-uids                connected-uids)) ; Watchable, read-only atom
 
 
-
 (defn broadcast
   "Broadcast data to all connected clients"
   [data]
   (doseq [uid (:any @connected-uids)]
     (chsk-send! uid data)))
 
-
 ; Watch for changes to the shared DB and broadcast a diff to them.
 (add-watch db/shared :watch
-  (fn [k reference old-state new-state]
-    (broadcast [:state/diff (differ/diff old-state new-state)])))
-
+           (fn [k reference old-state new-state]
+             (broadcast [:state/diff (differ/diff old-state new-state)])))
 
 (defmulti event-msg-handler :id)
 
@@ -42,7 +39,6 @@
 
 (defmethod event-msg-handler :chsk/ws-ping [ev-msg])
 
-
 (defmethod event-msg-handler :state/sync [ev-msg]
   (broadcast [:state/sync @db/shared]))
 
@@ -51,6 +47,10 @@
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (reset! db/shared (update-in @db/shared [:count] + (:delta ?data))))
 
+(defmethod event-msg-handler :blog/get
+  ; Increment the counter locally. The watcher will push the state to clients.
+  [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
+  (reset! db/shared (update-in @db/shared [:count] + (:delta ?data))))
 
 (defonce router (atom nil))
 (defn stop-router! [] (when-let [stop-f @router] (stop-f)))
