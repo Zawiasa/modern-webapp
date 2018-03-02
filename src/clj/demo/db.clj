@@ -99,7 +99,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def shared (duratom :local-file
-                     :file-path "db/shared"
+                     :file-path "db/shared.edn"
                      :init {}))
 
 ;; backed by postgres-db

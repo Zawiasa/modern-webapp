@@ -29,7 +29,7 @@
         true :four-o-four}])
 
 (defn footer []
-  [:footer
+  [:footer.footer
    [:div.uk-width-1-1.uk-card.uk-card-default.uk-position-bottom
     [:h2.uk-heading-bullet.uk-padding-small.uk-padding-remove-vertical.uk-margin-small-top.uk-margin-small
      "Footer"]
@@ -44,7 +44,7 @@
      {:data-uk-grid true}
 
      [:div.uk-width-auto
-      [:img.uk-comment-avatar
+      [:img
        {:alt ""
         :width "40"
         :src (str "/img/icons/" (name the-key) ".svg")}]]
@@ -82,8 +82,8 @@
        [:li
         [:a.uk-margin-small-top {:href "#" :style {:height "20px"}}
          [:img
-          {:height "50"
-           :width "50"
+          {:height "40"
+           :width "40"
            :src "/img/icons/triangle.png"}]]
         [:div.uk-navbar-dropdown.uk-navbar-dropdown-width-2
          [:div.uk-navbar-dropdown-grid.uk-child-width-1-2
@@ -118,20 +118,21 @@
             ;[:li.uk-nav-divider]
             ;[:li [:a {:href "#"} "Item"]]]]]]]]]
      [:div.uk-navbar-right
-      [:ul.uk-navbar-nav
+      [:ul.uk-navbar-nav.uk-padding-small.uk-padding-remove-vertical
        [language-menu]]]]))
 
 (defn frame []
   (fn []
     (let [page (:current-page (session/get :route))]
-      [:div
+      [:div.app-layout
        [navbar]
-       (case page
-         :home-page  [home-page]
-         :about [about]
-         :blog  [blog]
-         :four-o-four [four-o-four])
-       [footer]])))
+       [:div
+        (case page
+          :home-page  [home-page]
+          :about [about]
+          :blog  [blog]
+          :four-o-four [four-o-four])]])))
+       ;[footer]])))
 
 (defn mount-root []
   (reagent/render [frame] (.getElementById js/document "app")))
