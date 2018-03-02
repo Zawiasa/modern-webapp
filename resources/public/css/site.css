@@ -1,6 +1,15 @@
+.choose-language:hover
+  {
+    background: beige;
 
+  }
 
+.choose-language
+  {
+    border-radius: 5px;
+    padding: 5px !important;
 
+  }
 
 
 
