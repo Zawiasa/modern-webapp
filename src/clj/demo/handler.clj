@@ -8,7 +8,7 @@
             [hiccup.page :refer [include-js include-css]]
             [prone.middleware :refer [wrap-exceptions]]
             [ring.middleware.reload :refer [wrap-reload]]
-            [bidi.ring :refer [make-handler ->ResourcesMaybe]]
+            [bidi.ring :refer [make-handler]]
             [ring.util.response :as res]
             [environ.core :refer [env]]))
 
