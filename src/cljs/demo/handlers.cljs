@@ -22,6 +22,31 @@
    (assoc db the-key package)))
 
 (reg-event-db
+ :blog/get
+ (fn [db [_ content]]
+   (js/console.log (str "Halimali" content))
+   (assoc-in db
+             [:shared :blogs]
+             (conj (:shared (:blogs db))
+                   (assoc-in {:uuid "84c24f6c-694c-45a5-b85f-03f48b0adece"
+                              :author "Zawiasa2"
+                              :date "2017-12-24"
+                              :languages
+                              {:hu {:title "hu"
+                                    :content "paprikás krumpli"}
+                               :en
+                               {:title "en"
+                                :content "Tea"}
+                               :fr
+                               {:title "fr"
+                                :content "Bagett"}
+                               :de
+                               {:title "de"
+                                :content "Sör"}}}
+                             [:languages :hu :content]
+                             content)))))
+
+(reg-event-db
  :increment-count
  (fn [db [_ delta]]
    (ws/chsk-send! [:counter/incr {:delta delta}])
