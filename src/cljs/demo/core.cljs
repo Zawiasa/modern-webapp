@@ -85,15 +85,15 @@
           {:height "40"
            :width "40"
            :src "/img/icons/triangle.png"}]]
-        [:div.uk-navbar-dropdown.uk-navbar-dropdown-width-2
+        [:div.uk-navbar-dropdown.uk-width-1-2 {:data-uk-dropdown true}
          [:div.uk-navbar-dropdown-grid.uk-child-width-1-2
           {:data-uk-grid true}
           [:div
            [:ul.uk-nav.uk-navbar-dropdown-nav
             [:li.uk-active
-             [:a {:href (bidi/path-for app-routes :home-page)} "Home-page"]]
+             [:a.uk-dropdown-close {:href (bidi/path-for app-routes :home-page)} "Home-page"]]
             [:li.uk-active
-             [:a {:href (bidi/path-for app-routes :blog)} "Blog"]]]]
+             [:a.uk-dropdown-close {:href (bidi/path-for app-routes :blog)} "Blog"]]]]
             ;[:li [:a {:href "#"} "Featured"]]
 
             ;[:li [:a {:href "#"} "Item"]]
@@ -103,7 +103,7 @@
           [:div
            [:ul.uk-nav.uk-navbar-dropdown-nav
             [:li.uk-active
-             [:a {:href (bidi/path-for app-routes :about)} "About"]]]]]]]
+             [:a.uk-dropdown-close {:href (bidi/path-for app-routes :about)} "About"]]]]]]]
        [:li
         [:h3.uk-heading-bullet.uk-padding-remove.uk-margin-remove (case page
                                                                     :home-page "Home-page"
