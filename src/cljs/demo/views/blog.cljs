@@ -112,21 +112,26 @@
          [:div [:a.uk-button.uk-button-text {:href "#"} "5 Comments"]]]]])))
 
 (defn blogs []
-  (let [c (subscribe [:data "shared"])
+  (let [the-blogs (subscribe [:data "blogs"])
         language-key (subscribe [:data "active-language"])]
-    [:div.uk-container
-     [:div.uk-grid {:data-uk-grid true}
-      [:div.uk-width-1-1
-       ;(str @c)
-       [:button.uk-button.uk-button-primary.uk-width-1-1.uk-margin-remove
-        {:data-uk-toggle "target: #my-id"}
-        "Add blog entry"]]
-      ;(str :blogs @c)
-      (map-indexed
-       (fn [index post]
-         (-> ^{:key index}
-          [one-blog post]))
-       (:blogs @c))]]))
+    (reagent/create-class
+     {:component-did-update #(dispatch [:blogs/get 0])
+      :component-did-mount #(dispatch [:blogs/get 0])
+      :reagent-render
+      (fn []
+        [:div.uk-container
+         [:div.uk-grid {:data-uk-grid true}
+          [:div.uk-width-1-1
+           ;(str @c)
+           [:button.uk-button.uk-button-primary.uk-width-1-1.uk-margin-remove
+            {:data-uk-toggle "target: #my-id"}
+            "Add blog entry"]]
+          (str @the-blogs)
+          (map-indexed
+           (fn [index post]
+             (-> ^{:key index}
+              [one-blog post]))
+           @the-blogs)]])})))
 
 (defn blog []
   [:div
