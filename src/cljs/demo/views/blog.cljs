@@ -1,23 +1,20 @@
 (ns demo.views.blog
   (:require [re-frame.core :as re-frame :refer [subscribe dispatch]]
             [reagent.core :as reagent :refer [atom]]
-            [cljsjs.quill :as quill]
+
             [cljs.reader :refer [read-string]]))
 
-(defn quill-editor [the-key content]
-  (let [quill-atom (atom nil)]
+(defn quill-component [class]
+  (let []
     (reagent/create-class
-     {:component-did-mount #(reset! quill-atom (quill/quill "#editor" (clj->js {"theme" "snow"})))
-      :reagent-render
-      (fn [the-key content]
+     {:component-did-mount #(js/Quill.
+                             (str "#" class)
+                             (clj->js
+                              {:theme "snow"
+                               :modules {:toolbar true}})) :reagent-render
+      (fn [class]
+        [:div {:id class :style {:height "500px"}}])})))
 
-        [:div
-         [quill/editor
-          {:id "my-quill-editor-component-id"
-           :content "welcome to reagent-quill!"
-           :selection nil
-           :on-change-fn #(if (= % "user")
-                            (println (str "text changed: " %2)))}]])})))
 (defn add-blog []
   (let [chosen-language (atom :hu)
         input-atom (atom
@@ -67,12 +64,7 @@
               [:div.uk-margin [:input.uk-input {:placeholder (str (:title (get (:languages @input-atom) @chosen-language)))}]]
               [:div.uk-margin
                (str @chosen-language)
-               [quill-editor
-                (name @chosen-language)
-                [:div
-                 [:p (str (:content (get (:languages @input-atom) @chosen-language)))]
-                 [:p "Some initial " [:strong "bold"] " text"]
-                 [:p [:br]]]]]]]]]
+               [quill-component "quill"]]]]]]
 
           [:div.uk-modal-footer.uk-text-right
            [:button.uk-button.uk-button-default.uk-modal-close

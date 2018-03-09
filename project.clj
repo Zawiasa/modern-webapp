@@ -18,7 +18,7 @@
                            [hiccup "1.0.5"]
                            [bidi "2.1.3"]
                            [environ "1.1.0"]
-                           [cljsjs/quill "1.3.5-0"]
+
                            [org.clojure/clojurescript "1.9.946"]
                            [venantius/accountant "0.2.3"]
                            [com.taoensso/sente "1.12.0"]
