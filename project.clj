@@ -18,6 +18,7 @@
                            [hiccup "1.0.5"]
                            [bidi "2.1.3"]
                            [environ "1.1.0"]
+                           [cljsjs/quill "1.3.5-0"]
                            [org.clojure/clojurescript "1.9.946"]
                            [venantius/accountant "0.2.3"]
                            [com.taoensso/sente "1.12.0"]
@@ -65,6 +66,7 @@
                                             [lein-figwheel "0.5.14"]
                                             [org.clojure/tools.nrepl "0.2.10"]
                                             [com.cemerick/piggieback "0.2.2"]
+                                            [day8.re-frame/re-frame-10x "0.2.0-react16"]
                                             [pjstadig/humane-test-output "0.7.0"]]
 
                              :source-paths ["env/dev/clj"]
@@ -83,14 +85,18 @@
                              :env {:dev true}
 
                              :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"]
+
                                                         :compiler {:main "demo.dev"
-                                                                   :source-map true}}}}} :uberjar {:hooks [leiningen.cljsbuild minify-assets.plugin/hooks]
-                                                                                                   :env {:production true}
-                                                                                                   :aot :all
-                                                                                                   :omit-source true
-                                                                                                   :cljsbuild {:jar true
-                                                                                                               :builds {:app
-                                                                                                                        {:source-paths ["env/prod/cljs"]
-                                                                                                                         :compiler
-                                                                                                                         {:optimizations :advanced
-                                                                                                                          :pretty-print false}}}}}})
+                                                                   :closure-defines      {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                                   :preloads             [day8.re-frame-10x.preload]
+                                                                   :source-map true}}}}
+                             :uberjar {:hooks [leiningen.cljsbuild minify-assets.plugin/hooks]
+                                       :env {:production true}
+                                       :aot :all
+                                       :omit-source true
+                                       :cljsbuild {:jar true
+                                                   :builds {:app
+                                                            {:source-paths ["env/prod/cljs"]
+                                                             :compiler
+                                                             {:optimizations :advanced
+                                                              :pretty-print false}}}}}}})

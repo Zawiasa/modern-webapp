@@ -20,10 +20,12 @@
      [:meta {:name "viewport"
              :content "width=device-width, initial-scale=1"}]
      (include-css (if (env :dev) "css/site.css" "css/site.min.css"))
-     (include-css "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/css/uikit.min.css")]
+     (include-css "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/css/uikit.min.css")
+     (include-css "https://cdn.quilljs.com/1.3.5/quill.snow.css")]
     [:body.full-page
      [:div#app
       [:h3 "Loading..."]]]
+    (include-js "https://cdn.quilljs.com/1.3.5/quill.js")
     (include-js "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/js/uikit.min.js")
     (include-js "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/js/uikit-icons.min.js")
     (include-js "js/app.js")]))

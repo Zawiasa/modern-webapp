@@ -1,9 +1,25 @@
 (ns demo.views.blog
   (:require [re-frame.core :as re-frame :refer [subscribe dispatch]]
+            [reagent.core :as reagent :refer [atom]]
+            [cljsjs.quill :as quill]
             [cljs.reader :refer [read-string]]))
 
+(defn quill-editor [the-key content]
+  (let [quill-atom (atom nil)]
+    (reagent/create-class
+     {:component-did-mount #(reset! quill-atom (quill/quill "#editor" (clj->js {"theme" "snow"})))
+      :reagent-render
+      (fn [the-key content]
+
+        [:div
+         [quill/editor
+          {:id "my-quill-editor-component-id"
+           :content "welcome to reagent-quill!"
+           :selection nil
+           :on-change-fn #(if (= % "user")
+                            (println (str "text changed: " %2)))}]])})))
 (defn add-blog []
-  (let [random-text "Hello Belo"
+  (let [chosen-language (atom :hu)
         input-atom (atom
                     {:author "Martin Paul Cristian"
                      :date "2017-12-24"
@@ -19,42 +35,52 @@
                       :de
                       {:title "de"
                        :content "German"}}})]
-    [:div#my-id
-     {:data-uk-modal "bg-close:	false" :style {:opacity 0.95}}
-     [:div.uk-modal-dialog
-      [:button.uk-modal-close-default
-       {:data-uk-close true :type "button"}]
-      [:div.uk-modal-header [:h2.uk-modal-title "Add new blog entry"]]
-      [:div.uk-modal-body
-       [:div
-        {:data-uk-grid true}
-        [:div.uk-width-auto
-         [:ul.uk-tab-left
-          {:data-uk-tab
-           "connect: #component-tab-left; animation: uk-animation-fade"}
-          (for [language (:languages @input-atom)]
-            (-> ^{:key (first language)}
-             [:li.choose-language
-              [:img.uk-comment-avatar
-               {:alt ""
-                :width "40"
-                :src (str "/img/icons/" (name (first language)) ".svg")}]]))]]
-        [:div.uk-width-expand
-         [:ul#component-tab-left.uk-switcher
-          (for [language (:languages @input-atom)]
-            (-> ^{:key (first language)}
-             [:li
-              [:form.uk-form
-               [:div.uk-margin [:input.uk-input {:placeholder (str (first language) " title")}]]
-               [:div.uk-margin [:textarea.uk-textarea {:placeholder (str (first language) " content")}]]]]))]]]]
+    (reagent/create-class
+     {;:component-did-mount #(js/Quill. "#editor" (clj->js {"theme" "snow"}))
+      ;:component-did-update #(js/Quill. "#editor" (clj->js {"theme" "snow"}))
 
-      [:div.uk-modal-footer.uk-text-right
-       [:button.uk-button.uk-button-default.uk-modal-close
-        {:type "button"}
-        "Cancel"]
-       [:button.uk-button.uk-button-primary
-        {:type "button"}
-        "Save"]]]]))
+      :reagent-render
+      (fn []
+        [:div#my-id
+         {:data-uk-modal "bg-close:	false" :style {:opacity 0.95}}
+         [:div.uk-modal-dialog
+          [:button.uk-modal-close-default
+           {:data-uk-close true :type "button"}]
+          [:div.uk-modal-header [:h2.uk-modal-title "Add new blog entry"]]
+          [:div.uk-modal-body
+           [:div
+            {:data-uk-grid true}
+
+            [:div.uk-width-1-1
+             [:ul.uk-tab-left
+              {:data-uk-tab
+               true}
+              (for [language (:languages @input-atom)]
+                (-> ^{:key (first language)}
+                 [:li.choose-language.uk-width-1-4 {:on-click #(reset! chosen-language (first language))}
+                  [:img.uk-align-center.uk-margin-remove-bottom
+                   {:alt ""
+                    :width "40"
+                    :src (str "/img/icons/" (name (first language)) ".svg")}]]))]]
+            [:div.uk-width-1-1
+             [:form.uk-form
+              [:div.uk-margin [:input.uk-input {:placeholder (str (:title (get (:languages @input-atom) @chosen-language)))}]]
+              [:div.uk-margin
+               (str @chosen-language)
+               [quill-editor
+                (name @chosen-language)
+                [:div
+                 [:p (str (:content (get (:languages @input-atom) @chosen-language)))]
+                 [:p "Some initial " [:strong "bold"] " text"]
+                 [:p [:br]]]]]]]]]
+
+          [:div.uk-modal-footer.uk-text-right
+           [:button.uk-button.uk-button-default.uk-modal-close
+            {:type "button"}
+            "Cancel"]
+           [:button.uk-button.uk-button-primary
+            {:type "button"}
+            "Save"]]]])})))
 
 (defn one-blog [post]
   (let [language-key (subscribe [:data "active-language"])
