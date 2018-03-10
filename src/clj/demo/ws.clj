@@ -40,19 +40,19 @@
 (defmethod event-msg-handler :chsk/ws-ping [ev-msg])
 
 (defmethod event-msg-handler :state/sync [ev-msg]
-  (broadcast [:state/sync @db/shared]))
+  (broadcast [:state/sync (:shared @db/shared)]))
 
-(defmethod event-msg-handler :blog/add
+(defmethod event-msg-handler :blogs/add
   ; Increment the counter locally. The watcher will push the state to clients.
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (reset! db/shared (update-in @db/shared [:count] + (:delta ?data))))
+  (reset! db/shared (update-in @db/shared [:shared :count] + (:delta ?data))))
 
 (defmethod event-msg-handler :blogs/get
   ; Increment the counter locally. The watcher will push the state to clients.
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (?reply-fn (:blogs @db/shared)))
 
-(defmethod event-msg-handler :blog/update
+(defmethod event-msg-handler :blogs/update
   ; Increment the counter locally. The watcher will push the state to clients.
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
   (reset! db/shared (update-in @db/shared [:blogs] + (:delta ?data))))
@@ -60,7 +60,7 @@
 (defmethod event-msg-handler :counter/incr
   ; Increment the counter locally. The watcher will push the state to clients.
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (reset! db/shared (update-in @db/shared [:count] + (:delta ?data))))
+  (reset! db/shared (update-in @db/shared [:shared :count] + (:delta ?data))))
 
 (defonce router (atom nil))
 (defn stop-router! [] (when-let [stop-f @router] (stop-f)))

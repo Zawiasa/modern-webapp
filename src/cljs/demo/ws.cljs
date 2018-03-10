@@ -5,12 +5,11 @@
             [taoensso.encore :as encore :refer (debugf)]
             [taoensso.encore :as encore :refer-macros (have have?)]
             [taoensso.sente :as sente :refer (cb-success?)]
-            [re-frame.core :as re-frame]))
-
+            [re-frame.core :as re-frame :refer [dispatch]]))
 
 (let [{:keys [chsk ch-recv send-fn state]}
       (sente/make-channel-socket! "/chsk" ; Note the same path as before
-       {:type :auto})] ; e/o #{:auto :ajax :ws}
+                                  {:type :auto})] ; e/o #{:auto :ajax :ws}
 
   (def chsk       chsk)
   (def ch-chsk    ch-recv) ; ChannelSocket's receive channel
@@ -24,8 +23,6 @@
   [{:as ev-msg :keys [event]}]
   (debugf "Unandled event: %s" event))
 
-
-
 (defmethod event-msg-handler :chsk/state
   [{:as ev-msg :keys [?data open?]}]
   (let [[old-state-map new-state-map] (have vector? ?data)]
@@ -34,24 +31,22 @@
     ;(.notification js/UIkit (str "What's the problem" (:open? ?data)))
     (re-frame/dispatch [:ws/connected (:open? new-state-map)])))
 
-
 (defmethod event-msg-handler :chsk/handshake
-  [{:as ev-msg :keys [?data]}])
+  [{:as ev-msg :keys [?data]}]
+  (dispatch [:blogs/get])
+  (js/console.log (str "Handshake happened" ?data)))
   ; ???
-
 
 
 (defmethod event-msg-handler :chsk/recv
   [{:as ev-msg :keys [?data]}]
   (debugf "%s" ?data)
-  (.log js/console "hello" (str ?data))
+  (.log js/console (str ?data))
 ;  (.notification js/UIkit (str "What's the problem" (:open? ?data)))
   (re-frame/dispatch ?data))
 
-
 (defn event-msg-handler* [{:as ev-msg :keys [id ?data event]}]
   (event-msg-handler ev-msg))
-
 
 (def router (atom nil))
 (defn stop-router! [] (when-let [stop-f @router] (stop-f)))

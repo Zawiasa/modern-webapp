@@ -31,7 +31,7 @@
                8000 ; Timeout
                ;; Optional callback:
                (fn [reply] ; Reply is arbitrary Clojure data
-
+                 (js/console.log (str "Debugger" reply))
                  (if (cb-success? reply) ; Checks for :chsk/closed, :chsk/timeout, :chsk/error
                    (dispatch [:assoc-state :blogs reply]))))
    db))
