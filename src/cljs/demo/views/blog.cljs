@@ -13,7 +13,10 @@
                               {:theme "snow"
                                :modules {:toolbar true}})) :reagent-render
       (fn [class]
-        [:div {:id class :style {:height "500px"}}])})))
+        [:div {:id class :style {:height "500px"}}
+         [:div
+          {:dangerouslySetInnerHTML
+           {:__html "<image  height=\"600\" src=\"https://static1.squarespace.com/static/58f9c2fbd2b85759c7e4ec2f/5923cbe4be6594d8a0b033a9/5a0154a6ec212d85ddf7941f/1511246183022/mfsprout_20160406_1234-Print.jpg?format=1500w\"/>"}}]])})))
 
 (defn add-blog []
   (let [chosen-language (atom :hu)
@@ -49,9 +52,8 @@
             {:data-uk-grid true}
 
             [:div.uk-width-1-1
-             [:ul.uk-tab-left
-              {:data-uk-tab
-               true}
+             [:ul
+              {:data-uk-tab true}
               (for [language (:languages @input-atom)]
                 (-> ^{:key (first language)}
                  [:li.choose-language.uk-width-1-4 {:on-click #(reset! chosen-language (first language))}
@@ -63,7 +65,7 @@
              [:form.uk-form
               [:div.uk-margin [:input.uk-input {:placeholder (str (:title (get (:languages @input-atom) @chosen-language)))}]]
               [:div.uk-margin
-               (str @chosen-language)
+               ;(str @chosen-language)
                [quill-component "quill"]]]]]]
 
           [:div.uk-modal-footer.uk-text-right

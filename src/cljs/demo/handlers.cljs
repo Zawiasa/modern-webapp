@@ -11,10 +11,13 @@
  (fn [_ _]
    {:ws/connected false
     :active-language :hu
+
     :languages {:hu {:item "Magyar" :title "Nyelvek"}
                 :fr {:item "Français" :title "Lagues"}
                 :de {:item "Deutsche" :title "Sprachen"}
                 :en {:item "English" :title "Languages"}}
+
+    :dictionary {}
     :shared  {}
     :blogs []}))
 

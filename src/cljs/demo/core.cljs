@@ -91,6 +91,9 @@
 
 (defn navbar []
   (let [title (get app-titles (:handler (session/get :route)))]
+    ;    language-key (subscribe [:data "active-language"])]
+      ;  dictionary (subscribe [:data "dictionary"])
+    ;    get-content (fn [the-keys] (get-in (conj @dictionary @language-key) the-keys))]
     [:nav.uk-navbar-container
      {:data-uk-navbar true}
      [:div.uk-navbar-left
