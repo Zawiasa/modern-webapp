@@ -25,12 +25,12 @@
    :blog  "Blog"
    :four-o-four ":("})
 
-(def app-views 
-  (map-of 
-    home-page 
-    about
-    blog 
-    four-o-four))
+(def app-views
+  (map-of
+   home-page
+   about
+   blog
+   four-o-four))
 
 (def app-routes
   ["/" {"" :home-page
@@ -41,7 +41,6 @@
         "section-b" :section-b
         "missing-route" :missing-route
         true :four-o-four}])
-
 
 (defn footer []
   [:footer.footer
@@ -56,7 +55,9 @@
 (defn language-menu-item [[the-key item]]
   (let [title (:item item)]
     [:li.uk-grid-medium.uk-flex-middle.uk-margin-small
-     {:data-uk-grid true}
+     {:data-uk-grid true
+      :style {:cursor "pointer"}
+      :on-click #(dispatch [:assoc-state :active-language the-key])}
 
      [:div.uk-width-auto
       [:img
@@ -64,8 +65,8 @@
         :width "40"
         :src (str "/img/icons/" (name the-key) ".svg")}]]
      [:div.uk-width-expand
-      [:a.uk-link-reset {:href "#"
-                         :on-click #(dispatch [:assoc-state :active-language the-key])}
+      [:a.uk-link-reset {:href "#"}
+
        title]]]))
 
 (defn language-menu []
@@ -88,7 +89,6 @@
          (for [item @languages]
            ^{:key (first item)} [language-menu-item item])]]])))
 
-
 (defn navbar []
   (let [title (get app-titles (:handler (session/get :route)))]
     [:nav.uk-navbar-container
@@ -101,7 +101,7 @@
           {:height "40"
            :width "40"
            :src "/img/icons/triangle.png"}]]
-        [:div.uk-navbar-dropdown.uk-width-1-2 {:data-uk-dropdown true 
+        [:div.uk-navbar-dropdown.uk-width-1-2 {:data-uk-dropdown true
                                                :style {:top "50px"}} ;TODO fixme
          [:div.uk-navbar-dropdown-grid.uk-child-width-1-2
           {:data-uk-grid true}
@@ -134,15 +134,15 @@
       [:ul.uk-navbar-nav.uk-padding-small.uk-padding-remove-vertical
        [language-menu]]]]))
 
-(defn frame 
+(defn frame
   "Main Reagent Component"
   []
-  [:div.app-layout 
-   [navbar] 
-   [((get (session/get :route) :handler) app-views)] 
+  [:div.app-layout
+   [navbar]
+   [((get (session/get :route) :handler) app-views)]
    [footer]])
 
-(defn mount-root [] 
+(defn mount-root []
   (reagent/render [frame] (.getElementById js/document "app")))
 
 (defn init! []
