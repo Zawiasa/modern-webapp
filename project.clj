@@ -1,10 +1,13 @@
-(defproject demo "0.1.0-SNAPSHOT"
-            :description "FIXME: write description"
+(defproject demo "0.3.0-SNAPSHOT"
+            :description "Template based on Reagent & Re-Frame & Sente"
             :url "http://example.com/FIXME"
             :license {:name "Eclipse Public License"
                       :url "http://www.eclipse.org/legal/epl-v10.html"}
 
             :dependencies [[org.clojure/clojure "1.9.0"]
+
+                           [metosin/potpuri "0.5.1"]
+                           ;Common Clojure stuff
 
                            [http-kit "2.2.0"]
                            [reagent "0.8.0-alpha2"]

@@ -1,6 +1,7 @@
 (ns demo.core
   (:require [reagent.core :as reagent :refer [atom]]
             [reagent.session :as session]
+            [potpuri.core :refer [map-of]]
             ;;MVC
             [re-frame.core :as re-frame :refer [dispatch-sync dispatch subscribe]]
             [demo.handlers]
@@ -85,7 +86,8 @@
           {:height "40"
            :width "40"
            :src "/img/icons/triangle.png"}]]
-        [:div.uk-navbar-dropdown.uk-width-1-2 {:data-uk-dropdown true}
+        [:div.uk-navbar-dropdown.uk-width-1-2 {:data-uk-dropdown true 
+                                               :style {:top "50px"}} ;TODO fixme
          [:div.uk-navbar-dropdown-grid.uk-child-width-1-2
           {:data-uk-grid true}
           [:div
@@ -121,20 +123,20 @@
       [:ul.uk-navbar-nav.uk-padding-small.uk-padding-remove-vertical
        [language-menu]]]]))
 
-(defn frame []
-  (fn []
-    (let [page (:current-page (session/get :route))]
-      [:div.app-layout
-       [navbar]
-       [:div
-        (case page
-          :home-page  [home-page]
-          :about [about]
-          :blog  [blog]
-          :four-o-four [four-o-four])]])))
-       ;[footer]])))
+(defn frame 
+  "Main Reagent Component"
+  [] (fn []
+       (let 
+         [pages (map-of home-page about blog four-o-four)
+          {:keys [current-page]} (session/get :route)
+          view (get pages current-page)]
+         [:div.app-layout 
+          [navbar] 
+          [view] 
+          [footer]]
+         )))
 
-(defn mount-root []
+(defn mount-root [] 
   (reagent/render [frame] (.getElementById js/document "app")))
 
 (defn init! []
