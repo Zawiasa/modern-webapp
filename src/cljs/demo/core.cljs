@@ -134,17 +134,13 @@
       [:ul.uk-navbar-nav.uk-padding-small.uk-padding-remove-vertical
        [language-menu]]]]))
 
-
-
 (defn frame 
   "Main Reagent Component"
   []
-  (let 
-    [{:keys [handler route-params]} (session/get :route)]
-    [:div.app-layout 
-     [navbar] 
-     [(handler app-views)] 
-     [footer]]))
+  [:div.app-layout 
+   [navbar] 
+   [((get (session/get :route) :handler) app-views)] 
+   [footer]])
 
 (defn mount-root [] 
   (reagent/render [frame] (.getElementById js/document "app")))
