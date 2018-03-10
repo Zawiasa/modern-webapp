@@ -19,6 +19,19 @@
             [demo.ws :as ws])
   (:import goog.History))
 
+(def app-titles
+  {:home-page "Home-page"
+   :about "About"
+   :blog  "Blog"
+   :four-o-four ":("})
+
+(def app-views 
+  (map-of 
+    home-page 
+    about
+    blog 
+    four-o-four))
+
 (def app-routes
   ["/" {"" :home-page
         "blog" :blog
@@ -28,6 +41,7 @@
         "section-b" :section-b
         "missing-route" :missing-route
         true :four-o-four}])
+
 
 (defn footer []
   [:footer.footer
@@ -74,8 +88,9 @@
          (for [item @languages]
            ^{:key (first item)} [language-menu-item item])]]])))
 
+
 (defn navbar []
-  (let [page (:current-page (session/get :route))]
+  (let [title (get app-titles (:handler (session/get :route)))]
     [:nav.uk-navbar-container
      {:data-uk-navbar true}
      [:div.uk-navbar-left
@@ -107,51 +122,41 @@
             [:li.uk-active
              [:a.uk-dropdown-close {:href (bidi/path-for app-routes :about)} "About"]]]]]]]
        [:li
-        [:h3.uk-heading-bullet.uk-padding-remove.uk-margin-remove (case page
-                                                                    :home-page "Home-page"
-                                                                    :about "About"
-                                                                    :blog  "Blog"
-                                                                    :four-o-four ":(")]]]]
+        [:h3.uk-heading-bullet.uk-padding-remove.uk-margin-remove title]]]]
             ;[:li.uk-active [:a {:href (bidi/path-for app-routes :four-o-four)} "404"]]]]]]]]]
             ;[:li [:a {:href "#"} "Item"]]
             ;[:li.uk-nav-header "Header"]]]]]]]]
             ;[:li [:a {:href "#"} "Item"]]
             ;[:li [:a {:href "#"} "Item"]]
-            ;[:li.uk-nav-divider]
+            ;[:li er]
             ;[:li [:a {:href "#"} "Item"]]]]]]]]]
      [:div.uk-navbar-right
       [:ul.uk-navbar-nav.uk-padding-small.uk-padding-remove-vertical
        [language-menu]]]]))
 
+
+
 (defn frame 
   "Main Reagent Component"
-  [] (fn []
-       (let 
-         [pages (map-of home-page about blog four-o-four)
-          {:keys [current-page]} (session/get :route)
-          view (get pages current-page)]
-         [:div.app-layout 
-          [navbar] 
-          [view] 
-          [footer]]
-         )))
+  []
+  (let 
+    [{:keys [handler route-params]} (session/get :route)]
+    [:div.app-layout 
+     [navbar] 
+     [(handler app-views)] 
+     [footer]]))
 
 (defn mount-root [] 
   (reagent/render [frame] (.getElementById js/document "app")))
 
 (defn init! []
-  (accountant/configure-navigation!
-   {:nav-handler (fn
-                   [path]
-                   (let [match (bidi/match-route app-routes path)
-                         current-page (:handler match)
-                         route-params (:route-params match)]
-                     (session/put! :route {:current-page current-page
-                                           :route-params route-params})))
-    :path-exists? (fn [path]
-                    (boolean (bidi/match-route app-routes path)))})
-  (accountant/dispatch-current!)
-  (dispatch-sync [:initialize-db])
-  (mount-root)
-  (ws/start-router!));;(s/check bidi.schema/RoutePair app-routes)
+  (let [nav-handler (fn [path] (session/put! :route (bidi/match-route app-routes path)))
+        path-exists? (fn [path] (boolean (bidi/match-route app-routes path)))]
+    (accountant/configure-navigation! (map-of nav-handler path-exists?))
+    (accountant/dispatch-current!)
+    (dispatch-sync [:initialize-db])
+    (mount-root)
+    (ws/start-router!)))
+
+  ;;(s/check bidi.schema/RoutePair app-routes)
   ;;(s/validate bidi.schema/RoutePair app-routes)
