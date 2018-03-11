@@ -1,7 +1,7 @@
 (ns demo.views.blog
   (:require [re-frame.core :as re-frame :refer [subscribe dispatch]]
             [reagent.core :as reagent :refer [atom]]
-
+            [clojure.string :as string]
             [cljs.reader :refer [read-string]]))
 
 (defn quill-component [class quill-atom]
@@ -55,7 +55,15 @@
               {:data-uk-tab true}
               (for [language (:languages @input-atom)]
                 (-> ^{:key (first language)}
-                 [:li.choose-language.uk-width-1-4 {:on-click #(reset! chosen-language (first language))}
+                 [:li.choose-language.uk-width-1-4
+                  {:on-click #(do
+                                (reset! chosen-language (first language))
+                                (.setTextQuill js/window)
+                                (.populateQuill js/window
+                                                (string/replace
+                                                 (string/replace
+                                                  (str (first language)) #"<div id=\"bio\">" "") #"</div>" "")))}
+
                   [:img.uk-align-center.uk-margin-remove-bottom
                    {:alt ""
                     :width "40"
