@@ -10,10 +10,7 @@
      {:component-did-mount #(.initQuill js/window (str "#" class))
       :reagent-render
       (fn [class]
-        [:div {:id class :style {:height "500px"}}
-         [:div
-          {:dangerouslySetInnerHTML
-           {:__html "<div>Hello  <div/>"}}]])})))
+        [:div {:id class :style {:height "500px"}}])})))
 
 (defn add-blog []
   (let [quill (atom nil)
@@ -34,7 +31,7 @@
                       {:title "German"
                        :content "German"}}})]
     (reagent/create-class
-     {;:component-did-mount #(js/Quill. "#editor" (clj->js {"theme" "snow"}))
+     {:component-did-mount #(.populateQuill js/window (str (get-in @input-atom [:languages :hu :content])))
       ;:component-did-update #(js/Quill. "#editor" (clj->js {"theme" "snow"}))
 
       :reagent-render
@@ -56,7 +53,10 @@
               (for [language (:languages @input-atom)]
                 (-> ^{:key (first language)}
                  [:li.choose-language.uk-width-1-4
-                  {:on-click #(do
+                  {:class (if (= @chosen-language (first language))
+                            "language active-language"
+                            "language")
+                   :on-click #(do
                                 (reset! chosen-language (first language))
                                 (.setTextQuill js/window)
                                 (.populateQuill js/window (str (get-in @input-atom [:languages (first language) :content]))))}

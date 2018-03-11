@@ -1,6 +1,7 @@
 .choose-language:hover
   {
-    background: beige;
+    transform: scale(1.15);
+    transition: 0.3s ease-in-out;
 
   }
 
@@ -10,7 +11,13 @@
     padding: 5px !important;
 
   }
+.language {
+  border: 2px solid rgba(0,0,0,0);
+}
 
+.active-language{
+  border: 2px solid blue;
+}
 
 .app-layout {
   display: flex;
