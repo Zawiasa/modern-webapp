@@ -28,6 +28,7 @@
     (include-js "https://cdn.quilljs.com/1.3.5/quill.js")
     (include-js "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/js/uikit.min.js")
     (include-js "https://cdnjs.cloudflare.com/ajax/libs/uikit/3.0.0-beta.40/js/uikit-icons.min.js")
+    (include-js "externaljs/quill.js")
     (include-js "js/app.js")]))
 
 (defn index-handler
