@@ -22,16 +22,16 @@
                     {:author "Martin Paul Cristian"
                      :date "2017-12-24"
                      :languages
-                     {:hu {:title "hu"
-                           :content "Magyar"}
+                     {:hu {:title "Magyar  cím"
+                           :content "Magyar tartalom"}
                       :en
-                      {:title "en"
-                       :content "English"}
+                      {:title "English title"
+                       :content "English content"}
                       :fr
-                      {:title "fr"
+                      {:title "French"
                        :content "French"}
                       :de
-                      {:title "de"
+                      {:title "German"
                        :content "German"}}})]
     (reagent/create-class
      {;:component-did-mount #(js/Quill. "#editor" (clj->js {"theme" "snow"}))
@@ -59,11 +59,7 @@
                   {:on-click #(do
                                 (reset! chosen-language (first language))
                                 (.setTextQuill js/window)
-                                (.populateQuill js/window
-                                                (string/replace
-                                                 (string/replace
-                                                  (str (first language)) #"<div id=\"bio\">" "") #"</div>" "")))}
-
+                                (.populateQuill js/window (str (get-in @input-atom [:languages (first language) :content]))))}
                   [:img.uk-align-center.uk-margin-remove-bottom
                    {:alt ""
                     :width "40"
@@ -80,7 +76,8 @@
             {:type "button"}
             "Cancel"]
            [:button.uk-button.uk-button-primary
-            {:type "button"}
+            {:on-click #(dispatch [:blogs/add (assoc @input-atom (keyword @chosen-language) :content (.getQuill js/window))])
+             :type "button"}
             "Save"]]]])})))
 
 (defn one-blog [post]
