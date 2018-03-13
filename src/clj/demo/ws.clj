@@ -45,7 +45,8 @@
 (defmethod event-msg-handler :blogs/add
   ; Increment the counter locally. The watcher will push the state to clients.
   [{:as ev-msg :keys [event id ?data ring-req ?reply-fn send-fn]}]
-  (reset! db/shared (update-in @db/shared [:shared :count] + (:delta ?data))))
+  (reset! db/shared (assoc-in @db/shared [:blogs] (conj (:blogs @db/shared) ?data)))
+  (?reply-fn (:blogs @db/shared)))
 
 (defmethod event-msg-handler :blogs/get
   ; Increment the counter locally. The watcher will push the state to clients.

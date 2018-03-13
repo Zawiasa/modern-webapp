@@ -38,15 +38,19 @@
       (fn []
         [:div#my-id
          {:data-uk-modal "bg-close:	false" :style {:opacity 0.95}}
+
          [:div.uk-modal-dialog
+          ;[:div (str @input-atom)]
           [:button.uk-modal-close-default
            {:data-uk-close true :type "button"}]
           [:div.uk-modal-header [:h2.uk-modal-title "Add new blog entry"]]
+          [:div.uk-button.uk-button-default
+           {:on-click #(dispatch [:blogs/add @input-atom])}
+           "Save"]
           [:div.uk-modal-body
            [:div
             {:data-uk-grid true}
-            [:button {:on-click #(.notification js/UIkit (str (.getQuill js/window)))}
-             "Show editor content"]
+
             [:div.uk-width-1-1
              [:ul
               {:data-uk-tab true}
@@ -66,9 +70,13 @@
                     :src (str "/img/icons/" (name (first language)) ".svg")}]]))]]
             [:div.uk-width-1-1
              [:form.uk-form
-              [:div.uk-margin [:input.uk-input {:placeholder (str (:title (get (:languages @input-atom) @chosen-language)))}]]
               [:div.uk-margin
-               ;(str @chosen-language)
+               [:input.uk-input {:on-change #(swap! input-atom assoc-in [:languages (keyword @chosen-language) :content] (-> % .-target .-value))
+                                 :placeholder (str (:title (get (:languages @input-atom) @chosen-language)))}]]
+              [:div.uk-margin
+               [:div.uk-button.uk-button-default
+                {:on-click #(swap! input-atom assoc-in [:languages (keyword @chosen-language) :content] (str (.getQuill js/window)))}
+                "Save edit"]
                [quill-component "quill" quill]]]]]]
 
           [:div.uk-modal-footer.uk-text-right

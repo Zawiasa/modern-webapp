@@ -40,6 +40,19 @@
    db))
 
 (reg-event-db
+ :blogs/add
+ (fn [db [_ the-map]]
+   (.notification js/UIkit (str the-map))
+   (chsk-send! [:blogs/add the-map]
+               8000 ; Timeout
+               ;; Optional callback:
+               (fn [reply] ; Reply is arbitrary Clojure data
+                 (js/console.log (str "Djhgj" reply))
+                 (if (cb-success? reply) ; Checks for :chsk/closed, :chsk/timeout, :chsk/error
+                   (dispatch [:blogs/get 0]))))
+   db))
+
+(reg-event-db
  :increment-count
  (fn [db [_ delta]]
    (ws/chsk-send! [:counter/incr {:delta delta}])
