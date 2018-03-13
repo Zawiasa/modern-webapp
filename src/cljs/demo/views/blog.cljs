@@ -117,8 +117,9 @@
          ;(str (the-post post language-key))
 
         ;(read-string data-hiccup)
-        [:p
-         (:content (the-post post language-key))]
+        [:p {:dangerouslySetInnerHTML
+             {:__html (:content (the-post post language-key))}}]
+
         [:div.uk-grid-small.uk-child-width-auto.uk-padding-small
          {:data-uk-grid true}
          [:div [:a.uk-button.uk-button-text {:href "#"} "Read more"]]
