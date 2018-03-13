@@ -133,7 +133,7 @@
       :component-did-mount #(dispatch [:blogs/get 0])
       :reagent-render
       (fn []
-        [:div.uk-container
+        [:div.uk-container {:style {:padding-bottom "100px"}}
          [:div.uk-grid {:data-uk-grid true}
           [:div.uk-width-1-1
            ;(str @c)
