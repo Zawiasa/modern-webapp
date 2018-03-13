@@ -71,7 +71,7 @@
             [:div.uk-width-1-1
              [:form.uk-form
               [:div.uk-margin
-               [:input.uk-input {:on-change #(swap! input-atom assoc-in [:languages (keyword @chosen-language) :content] (-> % .-target .-value))
+               [:input.uk-input {:on-change #(swap! input-atom assoc-in [:languages (keyword @chosen-language) :title] (-> % .-target .-value))
                                  :placeholder (str (:title (get (:languages @input-atom) @chosen-language)))}]]
               [:div.uk-margin
                [:div.uk-button.uk-button-default
